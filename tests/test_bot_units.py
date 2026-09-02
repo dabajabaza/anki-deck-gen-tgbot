@@ -1,0 +1,109 @@
+"""Мелкие узлы бота: callback_data, Pending, ограниченное FSM-хранилище."""
+
+from aiogram.fsm.storage.base import StorageKey
+
+from anki_deck_gen.bot import callbacks
+from anki_deck_gen.bot.pending import Pending, PendingStore
+from anki_deck_gen.bot.storage import BoundedMemoryStorage
+from anki_deck_gen.domain import AudioSide, DeckSettings, Fix, Problem, ProblemRow, Validation
+from tests.helpers.factories import make_row, make_table
+
+# ---------- callback_data ----------
+
+
+def test_the_longest_callback_fits_telegram_limit() -> None:
+    longest = DeckSettings(
+        note_type_id="basic-reversed", lang_q="en", lang_a="ru", audio=AudioSide.BOTH
+    )
+    assert len(callbacks.settings(longest).encode()) <= callbacks.CALLBACK_DATA_LIMIT
+    assert len(callbacks.settings(longest).encode()) == 27
+
+
+def test_settings_roundtrip() -> None:
+    value = DeckSettings(
+        note_type_id="vietnamese", lang_q="vi", lang_a="en", audio=AudioSide.QUESTION
+    )
+    parsed = callbacks.parse(callbacks.settings(value))
+    assert parsed is not None and parsed.deck_settings() == value
+
+
+def test_garbage_is_not_parsed() -> None:
+    assert callbacks.parse("s:basic:en-ru:loud") is None
+    assert callbacks.parse("lp:basic") is None
+    assert callbacks.parse("whatever") is None
+
+
+# ---------- Pending ----------
+
+
+def _pending() -> Pending:
+    row_bad = make_row(3, "dog", "")
+    return Pending(
+        table=make_table(("a", "б")),
+        validation=Validation(
+            problems=(ProblemRow(row=row_bad, problem=Problem.EMPTY_ANSWER),),
+            duplicates=(),
+            notes=1,
+        ),
+        deck_name="x",
+        chat_id=1,
+        status_message_id=1,
+    )
+
+
+def test_pending_expires_and_touch_extends() -> None:
+    store = PendingStore(ttl_s=0.05)
+    store.put(1, _pending())
+    assert store.get(1) is not None
+    import time
+
+    time.sleep(0.06)
+    assert store.get(1) is None
+
+    store = PendingStore(ttl_s=0.1)
+    store.put(1, _pending())
+    time.sleep(0.06)
+    assert store.touch(1) is not None
+    time.sleep(0.06)
+    assert store.get(1) is not None, "touch must have extended the deadline"
+
+
+def test_unresolved_respects_fixes_and_skips() -> None:
+    item = _pending()
+    assert len(item.unresolved()) == 1
+    item.fixes[(None, 3)] = Fix("dog", "пёс")
+    assert item.unresolved() == []
+    assert item.notes == 2
+
+
+# ---------- BoundedMemoryStorage ----------
+
+
+def _key(user_id: int) -> StorageKey:
+    return StorageKey(bot_id=1, chat_id=user_id, user_id=user_id)
+
+
+async def test_storage_keeps_nothing_for_a_pure_reader() -> None:
+    storage = BoundedMemoryStorage(max_keys=10)
+    assert await storage.get_state(_key(1)) is None
+    assert await storage.get_data(_key(1)) == {}
+    assert len(storage) == 0
+
+
+async def test_storage_evicts_the_oldest_beyond_the_cap() -> None:
+    storage = BoundedMemoryStorage(max_keys=3)
+    for i in range(1, 5):
+        await storage.set_state(_key(i), "fixing")
+    assert len(storage) == 3
+    assert await storage.get_state(_key(1)) is None
+    assert await storage.get_state(_key(4)) == "fixing"
+
+
+async def test_clearing_state_and_data_drops_the_key() -> None:
+    storage = BoundedMemoryStorage(max_keys=3)
+    await storage.set_state(_key(1), "fixing")
+    await storage.set_data(_key(1), {"a": 1})
+    await storage.set_state(_key(1), None)
+    assert len(storage) == 1, "data still there"
+    await storage.set_data(_key(1), {})
+    assert len(storage) == 0

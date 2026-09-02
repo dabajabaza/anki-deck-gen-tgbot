@@ -1,0 +1,118 @@
+"""Экраны, которые рисуются из нескольких обработчиков.
+
+Сводка после разбора нужна и приёму таблицы, и правке строк, и переименованию —
+поэтому она здесь, а не в одном из них. Плюс перевод исключений в слова.
+"""
+
+import logging
+
+from aiogram import Bot
+from aiogram.types import InlineKeyboardMarkup
+
+from anki_deck_gen import notetypes
+from anki_deck_gen.bot import keyboards, texts
+from anki_deck_gen.bot.pending import Pending
+from anki_deck_gen.config import BotSettings
+from anki_deck_gen.errors import (
+    FileTooLarge,
+    MissingColumns,
+    SheetNotShared,
+    SheetUnreachable,
+    TableUnreadable,
+    TooManyRows,
+    TtsUnavailable,
+    UnsupportedSource,
+)
+
+logger = logging.getLogger(__name__)
+
+
+def summary_text(pending: Pending) -> str:
+    table = pending.table
+    empty = [s.name for s in table.sheets if not s.rows and s.name]
+    return texts.summary(
+        deck_name=pending.deck_name,
+        sheets=sum(1 for s in table.sheets if s.rows),
+        notes=pending.notes,
+        problems=pending.unresolved(),
+        duplicates=len(pending.validation.duplicates),
+        empty_sheets=empty,
+    )
+
+
+def summary_keyboard(pending: Pending) -> InlineKeyboardMarkup | None:
+    """Проблемы не решены — кнопки про них; решены — выбор Типа записи."""
+    if pending.unresolved():
+        return keyboards.problems()
+    compatible = notetypes.compatible(pending.table.columns)
+    if not compatible:
+        return None
+    return keyboards.note_types(compatible)
+
+
+def no_compatible_text() -> str:
+    needs = "\n".join(
+        texts.NOTE_TYPE_NEEDS.format(label=nt.label, columns=", ".join(sorted(nt.required_columns)))
+        for nt in notetypes.REGISTRY.values()
+        if nt.visible_in_bot
+    )
+    return texts.NO_COMPATIBLE_TYPES.format(needs=needs)
+
+
+async def render_summary(bot: Bot, pending: Pending) -> None:
+    """Перерисовать статус-сообщение в сводку с уместной клавиатурой."""
+    text = summary_text(pending)
+    keyboard = summary_keyboard(pending)
+    if not pending.unresolved():
+        if keyboard is None:
+            text = f"{text}\n\n{no_compatible_text()}"
+        else:
+            text = f"{text}\n\n{texts.CHOOSE_NOTE_TYPE}"
+    await edit_status(bot, pending, text, keyboard)
+
+
+async def edit_status(
+    bot: Bot, pending: Pending, text: str, keyboard: InlineKeyboardMarkup | None = None
+) -> None:
+    """Правка статус-сообщения, которая не роняет обработчик.
+
+    Telegram отвечает «message is not modified» на правку тем же текстом и
+    той же клавиатурой — это не ошибка, человек нажал кнопку второй раз.
+    """
+    try:
+        await bot.edit_message_text(
+            chat_id=pending.chat_id,
+            message_id=pending.status_message_id,
+            text=text,
+            reply_markup=keyboard,
+        )
+    except Exception as exc:
+        logger.warning("status edit failed: %s: %s", type(exc).__name__, exc)
+
+
+def error_text(exc: Exception, settings: BotSettings) -> str:
+    """Что сказать человеку о неудаче разбора Таблицы."""
+    if isinstance(exc, UnsupportedSource):
+        return texts.ERR_UNSUPPORTED
+    if isinstance(exc, FileTooLarge):
+        return texts.ERR_FILE_TOO_LARGE.format(
+            size=texts.human_size(exc.size_bytes), limit=settings.max_file_mb
+        )
+    if isinstance(exc, TableUnreadable):
+        return texts.ERR_TABLE_UNREADABLE.format(detail=exc.detail)
+    if isinstance(exc, SheetNotShared):
+        return texts.ERR_SHEET_NOT_SHARED
+    if isinstance(exc, SheetUnreachable):
+        return texts.ERR_SHEET_UNREACHABLE
+    if isinstance(exc, TooManyRows):
+        return texts.ERR_TOO_MANY_ROWS.format(count=exc.count, limit=exc.limit)
+    if isinstance(exc, MissingColumns):
+        label = (
+            notetypes.REGISTRY[exc.note_type].label
+            if exc.note_type in notetypes.REGISTRY
+            else exc.note_type
+        )
+        return texts.ERR_MISSING_COLUMNS.format(label=label, columns=", ".join(sorted(exc.missing)))
+    if isinstance(exc, TtsUnavailable):
+        return texts.ERR_TTS
+    return texts.ERR_BUILD_FAILED

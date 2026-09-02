@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtual environments
+.venv/
+venv/
+
+# Секреты и локальный конфиг (.env.example — коммитим, .env — нет)
+.env
+
+# Локальные данные: реальные колоды, база доступа, кэш озвучки, сгенерированные .apkg.
+# В репозитории — только код и синтетические примеры.
+/local/
+/work/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+*.apkg
+
+# IDE
+.idea/
+.vscode/

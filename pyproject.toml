@@ -1,0 +1,94 @@
+[project]
+# ВАЖНО: имя определяет имя editable-файла, который пишет hatchling —
+# `_editable_impl_anki_deck_gen.pth`. Реестр деплоя (Automation/freebsd-server/site.yml,
+# поле editable_pth) ссылается ровно на него. Переименуй проект — и после первого релиза
+# каждый следующий будет молча исполнять предыдущий. См. docs/DEPLOY.md.
+name = "anki-deck-gen"
+description = "Telegram-бот и CLI: колоды Anki (.apkg) из таблиц, с озвучкой gTTS"
+requires-python = ">=3.12"
+version = "0.1.0"
+readme = "README.md"
+license = "MIT"
+authors = [
+    { name = "Carbon-Based Lifeform", email = "sdrv87@gmail.com" }
+]
+dependencies = [
+    "aiogram>=3.30.0",
+    # Импортируется напрямую (tables/sources.py скачивает экспорт Google Sheets),
+    # поэтому объявлена, а не унаследована от aiogram.
+    "aiohttp>=3.14.1",  # нижняя граница — версия из портов; см. [tool.uv]
+    # aiogram строит прокси-коннектор через этот пакет и импортирует его лениво:
+    # без него AiohttpSession(proxy=…) падает на конструировании — на каждом старте,
+    # в единственной конфигурации, которой пользуется прод (TELEGRAM_PROXY).
+    "aiohttp-socks>=0.10.1",
+    "pydantic-settings>=2.14.2",
+    "genanki>=0.13.1",
+    "gTTS>=2.5.4",
+    "openpyxl>=3.1.5",
+    "sqlalchemy[asyncio]>=2.0",
+    "aiosqlite>=0.22",
+    "alembic>=1.19",
+]
+
+[project.scripts]
+anki-deck-gen = "anki_deck_gen.cli:main"
+
+# Версии прибиты к тому, что везёт дерево портов FreeBSD, для пакетов без
+# чисто-питоновского wheel. PyPI не публикует wheels под FreeBSD вовсе, так что
+# всё с компилируемой частью собирается там из исходников — а для pydantic-core
+# это Rust, которого в jail нет (пакет 1.27 ГиБ). Jail ставит их из py312-* портов,
+# и pip пропускает сборку только при точном совпадении версии.
+#
+# Constraints, а не dependencies: они направляют резолвер, не становясь
+# требованиями проекта, — локальная разработка на Linux их не замечает.
+#
+# Проверяется по дереву портов скриптом scripts/check-freebsd-pins.py в CI.
+[tool.uv]
+constraint-dependencies = [
+    "aiohttp==3.14.1",        # py312-aiohttp
+    "pydantic-core==2.46.4",  # py312-pydantic-core
+    "greenlet==3.5.3",        # py312-greenlet (sqlalchemy[asyncio])
+    "markupsafe==3.0.3",      # py312-markupsafe (Mako ← alembic)
+    "openpyxl==3.1.5",        # py312-openpyxl
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=2.3.0",
+    "pre-commit>=4.6.1",
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "ruff>=0.16.0",
+    "types-openpyxl",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/anki_deck_gen"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+
+[tool.mypy]
+python_version = "3.12"
+plugins = ["pydantic.mypy"]
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+check_untyped_defs = true
+
+# genanki и gTTS не везут типов, стабов к ним нет.
+[[tool.mypy.overrides]]
+module = ["genanki.*", "gtts.*"]
+ignore_missing_imports = true

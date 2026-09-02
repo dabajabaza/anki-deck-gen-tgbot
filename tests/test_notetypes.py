@@ -1,0 +1,98 @@
+"""Типы записей: стоковые шаблоны Anki байт в байт, реестр и совместимость с колонками."""
+
+from anki_deck_gen import notetypes
+from anki_deck_gen.errors import UnknownNoteType
+from anki_deck_gen.notetypes import stock
+from anki_deck_gen.notetypes.base import ANKI_NAME_SUFFIX
+from tests.helpers.tables import make_row
+
+OLD_MODEL_IDS = {2163323615, 2163323616, 2163323618, 1759261800, 1762620000}
+
+
+def test_registry_holds_the_three_stock_types_and_the_vietnamese_one_in_order() -> None:
+    assert list(notetypes.REGISTRY) == ["basic", "basic-reversed", "basic-typing", "vietnamese"]
+
+
+def test_unknown_id_raises() -> None:
+    import pytest
+
+    with pytest.raises(UnknownNoteType):
+        notetypes.get("cloze")
+
+
+def test_basic_templates_are_stock_plus_audio_only() -> None:
+    (card,) = notetypes.get("basic").templates()
+    assert card["name"] == stock.CARD_1
+    assert stock.strip_audio(card["qfmt"]) == stock.STOCK_QFMT
+    assert stock.strip_audio(card["afmt"]) == stock.STOCK_AFMT
+
+
+def test_reversed_templates_are_stock_plus_audio_only() -> None:
+    first, second = notetypes.get("basic-reversed").templates()
+    assert stock.strip_audio(first["qfmt"]) == stock.STOCK_QFMT
+    assert stock.strip_audio(first["afmt"]) == stock.STOCK_AFMT
+    assert second["name"] == stock.CARD_2
+    assert stock.strip_audio(second["qfmt"]) == stock.STOCK_REVERSE_QFMT
+    assert stock.strip_audio(second["afmt"]) == stock.STOCK_REVERSE_AFMT
+
+
+def test_typing_templates_are_stock_plus_audio_only() -> None:
+    (card,) = notetypes.get("basic-typing").templates()
+    assert stock.strip_audio(card["qfmt"]) == stock.STOCK_TYPE_QFMT
+    assert stock.strip_audio(card["afmt"]) == stock.STOCK_TYPE_AFMT
+
+
+def test_the_typing_question_side_never_plays_the_answer_audio() -> None:
+    (card,) = notetypes.get("basic-typing").templates()
+    assert stock.AUDIO_BACK not in card["qfmt"]
+    assert stock.AUDIO_FRONT in card["qfmt"]
+
+
+def test_stock_types_use_the_stock_css() -> None:
+    for note_type_id in ("basic", "basic-reversed", "basic-typing"):
+        assert notetypes.get(note_type_id).css() == stock.STOCK_CSS
+
+
+def test_stock_fields_are_front_back_plus_two_audio_fields() -> None:
+    assert notetypes.get("basic").fields() == ["Front", "Back", "Audio Front", "Audio Back"]
+
+
+def test_model_ids_are_distinct_and_none_of_the_old_generator_ids() -> None:
+    ids = [nt.model_id for nt in notetypes.REGISTRY.values()]
+    assert len(set(ids)) == len(ids)
+    assert not set(ids) & OLD_MODEL_IDS
+
+
+def test_anki_name_carries_the_suffix_so_it_cannot_shadow_the_stock_type() -> None:
+    assert notetypes.get("basic").anki_name() == "Простая" + ANKI_NAME_SUFFIX
+
+
+def test_compatible_filters_by_required_columns_and_visibility() -> None:
+    with_qa = notetypes.compatible(frozenset({"Q", "A"}))
+    assert [nt.id for nt in with_qa] == ["basic", "basic-reversed", "basic-typing", "vietnamese"]
+    assert notetypes.compatible(frozenset({"Q"})) == []
+
+
+def test_note_fields_of_stock_types_place_audio_after_front_and_back() -> None:
+    row = make_row(2, "How are you?", "Как дела?")
+    fields = notetypes.get("basic-reversed").note_fields(row, audio_q="[sound:q.mp3]", audio_a="")
+    assert fields == ["How are you?", "Как дела?", "[sound:q.mp3]", ""]
+
+
+def test_vietnamese_colours_tones_and_reads_optional_columns() -> None:
+    vietnamese = notetypes.get("vietnamese")
+    row = make_row(
+        2,
+        "cảm ơn",
+        "thank you",
+        extra={"Dialect": "North", "Note": "n", "Example": "e", "Tips": "t"},
+    )
+    fields = vietnamese.note_fields(row, audio_q="[sound:x.mp3]", audio_a="")
+    assert fields[0] == '<font color="green">cảm</font> <font color="gray">ơn</font>'
+    assert fields[2] == '<font color="blue">North</font>'
+    assert fields[3:6] == ["n", "e", "t"]
+    assert fields[6] == "[sound:x.mp3]"
+    assert vietnamese.optional_columns == frozenset({"Tips", "Dialect", "Note", "Example"})
+    assert len(vietnamese.templates()) == 2
+    assert "{{Audio Front}}" in vietnamese.templates()[0]["afmt"]
+    assert "{{Audio}}" not in vietnamese.templates()[0]["afmt"]

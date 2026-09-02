@@ -1,0 +1,38 @@
+repos:
+  # Репозиторий публичный (иначе сервер не увидит статус-чек через анонимный
+  # GitHub API), так что утёкший секрет придётся отзывать, а не прятать.
+  # detect-private-key ловит только PEM/SSH-блоки; токены — работа gitleaks.
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.30.1
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.2  # держать в ногу с uv.lock: разные версии форматируют по-разному
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-added-large-files
+      - id: detect-private-key
+
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        # Запускается в собственном uv-окружении проекта (не в изолированном
+        # окружении pre-commit): плагину pydantic для mypy нужны реально
+        # установленные пакеты.
+        entry: uv run mypy
+        language: system
+        types: [python]
+        pass_filenames: false
+        args: [src, tests]
