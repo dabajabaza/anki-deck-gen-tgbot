@@ -32,6 +32,10 @@
 ## Разовый бутстрап jail — ДО записи в реестр
 
 Иначе `ansible-pull` каждые 2 минуты падает в `rescue` на несуществующем пользователе.
+И второе, проверено на первой выкатке: роль после перезапуска службы делает
+`service anki_deck_gen status`, а у **невключённой** службы `status` возвращает ошибку —
+выкатка признаётся провальной и откатывается на пустой `pre-deploy`. Значит, к моменту
+первой выкатки служба должна быть включена, а env-файл — заполнен целиком, включая токен.
 Внутри `jexec bots sh`:
 
 ```sh
@@ -52,7 +56,9 @@ WORK_DIR=/var/tmp/anki-deck-gen
 DATABASE_URL=sqlite+aiosqlite:////var/db/ankideckgen/access.sqlite
 ```
 
-`sysrc anki_deck_gen_enable=YES` — **последним**, после первой удачной выкатки.
+Заполнив токен — сразу `sysrc anki_deck_gen_enable=YES`. Служба не стартует до появления
+релиза (`~/app` ещё пуст), но `status` у включённой службы роль трактует правильно после
+своего же `restart`. Порядок: пользователь и каталоги → env с токеном → `sysrc` → push реестра.
 
 ## Регистрация в Automation
 
@@ -78,10 +84,14 @@ DATABASE_URL=sqlite+aiosqlite:////var/db/ankideckgen/access.sqlite
 ## После первой выкатки
 
 ```sh
-sysrc anki_deck_gen_enable=YES
-service anki_deck_gen start
-tail -f /var/log/messages     # ждём READY=1
+service anki_deck_gen status
+tail -f /var/log/messages     # ждём READY=1 от sdnotify-supervise
 ```
+
+Если реестр запушили раньше, чем включили службу: каждые 2 минуты роль будет
+выкатывать и откатывать релиз. Это самолечится — как только служба включена и env
+заполнен, следующий тик проходит health check. Не ждать можно так: на хосте
+`/usr/local/sbin/ansible-pull-bots`.
 
 Kuma-хартбит — строка `KUMA_PUSH_ANKI_DECK_GEN=…` в `/usr/local/etc/kuma-push.conf`,
 по желанию.
