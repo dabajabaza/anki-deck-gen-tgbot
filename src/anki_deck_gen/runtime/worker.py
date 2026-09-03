@@ -41,9 +41,11 @@ logger = logging.getLogger(__name__)
 # Сессионный таймаут 15 с подобран под быстрое обнаружение мёртвого long-poll и
 # для загрузки файла в мегабайты через прокси мал; отправка получает свой.
 _UPLOAD_TIMEOUT_S = 120
-# Сколько ждём поток сборки после того, как попросили его выйти. Он проверяет
-# флаг между фразами, а одна фраза — один запрос к Google; минуты хватает с
-# запасом. При остановке процесса ждём меньше: супервизор даёт 10 с до SIGKILL.
+# Сколько ждём поток сборки после того, как попросили его выйти. Поток проверяет
+# флаг перед каждым запросом к Google, а у запроса есть таймаут (build/audio.py:
+# 10 с на соединение, 60 с на чтение) — так что минуты хватает и ветка «не
+# дождались» практически недостижима. При остановке процесса ждём меньше:
+# супервизор даёт 10 с до SIGKILL.
 _ABANDON_GRACE_S = 60.0
 _SHUTDOWN_GRACE_S = 5.0
 
@@ -111,11 +113,15 @@ class RequestWorker:
         bot: Bot,
         settings: BotSettings,
         build: Builder = build_package,
+        abandon_grace_s: float = _ABANDON_GRACE_S,
+        shutdown_grace_s: float = _SHUTDOWN_GRACE_S,
     ) -> None:
         self._queue = queue
         self._bot = bot
         self._settings = settings
         self._build = build
+        self._abandon_grace_s = abandon_grace_s
+        self._shutdown_grace_s = shutdown_grace_s
 
     async def run(self) -> None:
         while True:
@@ -173,13 +179,16 @@ class RequestWorker:
             await self._deliver(request, result)
         except TimeoutError:
             abandoned.set()
-            await _settle(build, grace=_ABANDON_GRACE_S)
             minutes = self._settings.job_timeout_s // 60
             logger.warning("request from %s timed out after %s min", request.user_id, minutes)
+            # Вердикт — сразу: человеку обещали N минут, и ждать ещё grace, держа
+            # его на «Собираю…», значит соврать. Ожидание потока нужно только
+            # ради сохранности scratch, оно идёт после.
             await _say(request, texts.ERR_TIMED_OUT.format(minutes=minutes))
+            await _settle(build, grace=self._abandon_grace_s)
         except asyncio.CancelledError:
             abandoned.set()
-            await _settle(build, grace=_SHUTDOWN_GRACE_S)
+            await _settle(build, grace=self._shutdown_grace_s)
             raise
         except TtsUnavailable as exc:
             logger.warning("gTTS unavailable: %s", exc.detail)
@@ -249,10 +258,14 @@ async def _settle(build: "asyncio.Future[BuildResult] | None", *, grace: float) 
                 grace,
             )
             return
-    if not build.cancelled():
-        # Достать исключение (обычно BuildAbandoned), чтобы asyncio не жаловался
-        # на «exception was never retrieved».
-        build.exception()
+    if build.cancelled():
+        return
+    exc = build.exception()
+    if exc is not None and not isinstance(exc, BuildAbandoned):
+        # Брошенный поток упал не по нашему флагу, а по-настоящему — 429 от Google,
+        # ошибка записи кэша, баг. Это единственное место, где такое исключение ещё
+        # видно; молча выбросить его — потерять след повторяющейся проблемы.
+        logger.warning("abandoned build failed: %s: %s", type(exc).__name__, exc)
 
 
 async def _say(request: Request, text: str) -> None:

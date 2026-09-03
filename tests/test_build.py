@@ -232,3 +232,75 @@ def test_media_dir_never_leaks_files_from_outside(tmp_path: Path) -> None:
     )
     found = sorted(p.name for p in _images_in(row, media))
     assert found == ["ok.png"]
+
+
+def test_a_symlink_inside_media_dir_is_packaged_under_the_src_name(tmp_path: Path) -> None:
+    """Допуск — по разрешённому пути, упаковка — по имени из src (иначе битая картинка)."""
+    from anki_deck_gen.build.package import _images_in
+
+    media = tmp_path / "media"
+    (media / "photos").mkdir(parents=True)
+    (media / "photos" / "cat-hires.png").write_bytes(b"\x89PNG")
+    (media / "cat.png").symlink_to(media / "photos" / "cat-hires.png")
+    row = make_row(2, '<img src="cat.png">', "кот")
+    found = list(_images_in(row, media))
+    assert [p.name for p in found] == ["cat.png"]
+
+
+def test_rejected_images_are_logged_not_silent(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    from anki_deck_gen.build.package import _images_in
+
+    media = tmp_path / "media"
+    media.mkdir()
+    row = make_row(2, '<img src="../secret.txt"> <img src="missing.png">', "x")
+    with caplog.at_level("INFO", logger="anki_deck_gen.build.package"):
+        assert list(_images_in(row, media)) == []
+    messages = " ".join(caplog.messages)
+    assert "rejected" in messages and "not found" in messages
+
+
+def test_abandon_is_checked_before_every_tts_call_and_before_writing(tmp_path: Path) -> None:
+    """Флаг взведён после первой озвучки → второй запрос к Google не делается, .apkg не пишется."""
+    table = make_table(make_row(2, "a", "b"))
+    abandoned = threading.Event()
+
+    class StopAfterFirst(FakeAudioCache):
+        def ensure(self, text: str, lang: str) -> Path:
+            path = super().ensure(text, lang)
+            abandoned.set()
+            return path
+
+    cache = StopAfterFirst(tmp_path / "media")
+    out = tmp_path / "out"
+    with pytest.raises(BuildAbandoned):
+        build_package(
+            BuildRequest(table=table, settings=settings(audio=AudioSide.BOTH), deck_name="D"),
+            out_dir=out,
+            media_cache_dir=tmp_path / "media",
+            audio_cache=cache,
+            abandoned=abandoned,
+        )
+    assert len(cache.requested) == 1, "the answer side must not be voiced after abandon"
+    assert list(out.glob("*.apkg")) == []
+
+
+def test_abandon_right_before_writing_leaves_no_package(tmp_path: Path) -> None:
+    table = make_table(make_row(2, "a", "b"))
+    abandoned = threading.Event()
+    out = tmp_path / "out"
+
+    def flip(done: int, total: int) -> None:
+        abandoned.set()  # после последней озвучки, до записи пакета
+
+    with pytest.raises(BuildAbandoned):
+        build_package(
+            BuildRequest(table=table, settings=settings(audio=AudioSide.QUESTION), deck_name="D"),
+            out_dir=out,
+            media_cache_dir=tmp_path / "media",
+            audio_cache=FakeAudioCache(tmp_path / "media"),
+            abandoned=abandoned,
+            on_progress=flip,
+        )
+    assert list(out.glob("*.apkg")) == []

@@ -19,6 +19,10 @@ from anki_deck_gen.build.slug import slug
 from anki_deck_gen.errors import TtsUnavailable
 
 _TAGS = re.compile(r"<[^>]+>")
+# (connect, read) для requests внутри gTTS. Без таймаута полуоткрытый сокет к Google
+# вешает save() навсегда — а на этом держится посылка воркера «одна фраза ограничена
+# по времени», без которой флаг abandoned ничего не гарантирует (см. runtime/worker.py).
+_TTS_TIMEOUT_S = (10, 60)
 _SPACES = re.compile(r"\s+")
 
 
@@ -52,7 +56,7 @@ class AudioCache:
         path.parent.mkdir(parents=True, exist_ok=True)
         temporary = path.with_name(f"{path.name}.{uuid.uuid4().hex}.tmp")
         try:
-            gTTS(text=plain_text(text), lang=lang).save(str(temporary))
+            gTTS(text=plain_text(text), lang=lang, timeout=_TTS_TIMEOUT_S).save(str(temporary))
         except (gTTSError, requests.RequestException, AssertionError, ValueError) as exc:
             # AssertionError — так gTTS отказывается от пустого текста,
             # ValueError — от неизвестного языка.

@@ -43,7 +43,8 @@ async def on_settings_step(
         await callback.answer(texts.ERR_UNKNOWN_BUTTON, show_alert=True)
         return
     user_id = callback.from_user.id
-    item = pending.touch(user_id)
+    # get, а не touch: продлевать TTL только принятому нажатию (см. fix._current).
+    item = pending.get(user_id)
     message = callback.message if isinstance(callback.message, Message) else None
     if item is None:
         await callback.answer()
@@ -53,6 +54,7 @@ async def on_settings_step(
     if is_stale(callback, item):
         await callback.answer(texts.ERR_UNKNOWN_BUTTON, show_alert=True)
         return
+    pending.touch(user_id)
     if item.unresolved():
         # Кнопки настроек появляются только после решения проблем; сюда можно
         # попасть лишь старой кнопкой — вернуть человека к актуальной сводке.
