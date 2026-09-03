@@ -6,6 +6,7 @@
 
 import re
 from email.message import Message
+from email.utils import collapse_rfc2231_value
 from pathlib import Path
 
 import aiohttp
@@ -88,16 +89,30 @@ def read_file(path: Path) -> tuple[bytes, str]:
 
 
 def _title_from_disposition(value: str | None) -> str | None:
-    """Имя файла из Content-Disposition, включая RFC 2231 `filename*=UTF-8''…`.
+    """Имя файла из Content-Disposition; заголовок таблицы — оно без `.xlsx`.
 
-    email.message разбирает оба варианта и снимает процентное кодирование —
-    свой парсер тут был бы хуже стандартного.
+    Google шлёт оба варианта сразу: `filename=".xlsx"` (ASCII-огрызок для старых
+    клиентов) и `filename*=UTF-8''%D0%A4…xlsx` (RFC 2231, настоящее имя). Стандартный
+    `Message.get_filename()` берёт первый попавшийся параметр — то есть огрызок, — и
+    заголовок терялся: бот спрашивал имя колоды, хотя оно есть в документе. Поэтому
+    предпочитаем `filename*`, и только при его отсутствии — `filename`.
     """
     if not value:
         return None
     message = Message()
     message["Content-Disposition"] = value
-    filename = message.get_filename()
+    params = dict(message.get_params(header="Content-Disposition") or [])
+    filename: str | None = None
+    if "filename*" in params:
+        # get_params уже снял кодировку RFC 2231: значение — tuple(charset, lang, text)
+        # либо строка, если декодировать нечего.
+        raw = params["filename*"]
+        filename = collapse_rfc2231_value(raw) if isinstance(raw, tuple) else str(raw)
+    if not filename or filename.lower() == _XLSX_SUFFIX:
+        plain = params.get("filename")
+        if isinstance(plain, tuple):
+            plain = collapse_rfc2231_value(plain)
+        filename = str(plain) if plain else filename
     if not filename:
         return None
     if filename.lower().endswith(_XLSX_SUFFIX):
