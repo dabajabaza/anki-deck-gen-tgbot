@@ -117,3 +117,18 @@ async def test_a_quoted_plain_filename_also_gives_a_title(
     _patch_export(monkeypatch, client)
     _, title = await fetch_google_sheet(SHEET, session=client.session)
     assert title == "Phrases"
+
+
+def test_google_style_disposition_prefers_the_rfc2231_name() -> None:
+    """Google шлёт `filename=".xlsx"` и `filename*=UTF-8''…` разом — берём настоящее имя."""
+    from anki_deck_gen.tables.sources import _title_from_disposition
+
+    header = (
+        'attachment; filename=".xlsx"; '
+        "filename*=UTF-8''%D0%A4%D0%BE%D1%80%D0%BC%D1%83%D0%BB%D1%8B%20"
+        "%D0%B2%D0%B5%D0%B6%D0%BB%D0%B8%D0%B2%D0%BE%D1%81%D1%82%D0%B8.xlsx"
+    )
+    assert _title_from_disposition(header) == "Формулы вежливости"
+    assert _title_from_disposition('attachment; filename="Deck.xlsx"') == "Deck"
+    assert _title_from_disposition('attachment; filename=".xlsx"') is None
+    assert _title_from_disposition(None) is None
