@@ -11,6 +11,7 @@
 """
 
 import asyncio
+import functools
 import logging
 import shutil
 import tempfile
@@ -40,6 +41,11 @@ logger = logging.getLogger(__name__)
 # Сессионный таймаут 15 с подобран под быстрое обнаружение мёртвого long-poll и
 # для загрузки файла в мегабайты через прокси мал; отправка получает свой.
 _UPLOAD_TIMEOUT_S = 120
+# Сколько ждём поток сборки после того, как попросили его выйти. Он проверяет
+# флаг между фразами, а одна фраза — один запрос к Google; минуты хватает с
+# запасом. При остановке процесса ждём меньше: супервизор даёт 10 с до SIGKILL.
+_ABANDON_GRACE_S = 60.0
+_SHUTDOWN_GRACE_S = 5.0
 
 # Сигнатура build_package; параметр воркера, чтобы тесты подставляли подделку.
 Builder = Callable[..., BuildResult]
@@ -133,6 +139,7 @@ class RequestWorker:
         # фразами и выходит за одну (см. build/package.py).
         abandoned = threading.Event()
         loop = asyncio.get_running_loop()
+        build: asyncio.Future[BuildResult] | None = None
 
         def on_progress(done: int, total: int) -> None:
             # Вызывается в рабочем потоке; ProgressReporter живёт в цикле событий.
@@ -143,25 +150,36 @@ class RequestWorker:
         try:
             async with asyncio.timeout(self._settings.job_timeout_s):
                 await request.reporter.set(texts.BUILDING)
-                result = await asyncio.to_thread(
-                    self._build,
-                    request.build,
-                    out_dir=scratch,
-                    media_cache_dir=self._settings.media_cache_dir,
-                    on_progress=on_progress,
-                    abandoned=abandoned,
+                # run_in_executor + shield, а не to_thread: по таймауту отменяется только
+                # ожидание, а future потока остаётся у нас в руках — чтобы после флага
+                # abandoned ДОЖДАТЬСЯ выхода потока, прежде чем удалять его scratch и
+                # брать следующее Задание. Иначе два build шли бы одновременно (A5), а
+                # запоздалый поток писал бы .apkg в уже снесённый каталог.
+                build = loop.run_in_executor(
+                    None,
+                    functools.partial(
+                        self._build,
+                        request.build,
+                        out_dir=scratch,
+                        media_cache_dir=self._settings.media_cache_dir,
+                        on_progress=on_progress,
+                        abandoned=abandoned,
+                    ),
                 )
+                result = await asyncio.shield(build)
             # Вне дедлайна намеренно: он ограничивает РАБОТУ, а работа сделана.
             # Дедлайн, истёкший во время последней правки статуса, отменял саму
             # правку и оставлял «Собираю…» навсегда.
             await self._deliver(request, result)
         except TimeoutError:
             abandoned.set()
+            await _settle(build, grace=_ABANDON_GRACE_S)
             minutes = self._settings.job_timeout_s // 60
             logger.warning("request from %s timed out after %s min", request.user_id, minutes)
             await _say(request, texts.ERR_TIMED_OUT.format(minutes=minutes))
         except asyncio.CancelledError:
             abandoned.set()
+            await _settle(build, grace=_SHUTDOWN_GRACE_S)
             raise
         except TtsUnavailable as exc:
             logger.warning("gTTS unavailable: %s", exc.detail)
@@ -175,9 +193,8 @@ class RequestWorker:
                 ),
             )
         except BuildAbandoned:
-            # Флаг взводим только мы — по таймауту или отмене, — и обе ветви уже
-            # сказали своё. Сюда попадает лишь гонка «флаг взведён, но исключение
-            # из потока пришло раньше TimeoutError»; вердикт всё равно нужен.
+            # Флаг взводим только мы; сюда попадает лишь гонка «поток вышел по флагу
+            # раньше, чем таймаут дошёл до нас». Вердикт всё равно нужен.
             logger.warning("build for %s reported abandonment", request.user_id)
             await _say(
                 request, texts.ERR_TIMED_OUT.format(minutes=self._settings.job_timeout_s // 60)
@@ -212,6 +229,30 @@ class RequestWorker:
             len(result.summary.subdecks),
         )
         await request.reporter.replace_with_upload(texts.DONE_FALLBACK)
+
+
+async def _settle(build: "asyncio.Future[BuildResult] | None", *, grace: float) -> None:
+    """Дать потоку сборки выйти по флагу; исключение из него — ожидаемое, не шум.
+
+    Не дождались за ``grace`` — говорим об этом в лог и идём дальше: держать
+    очередь заложником зависшего запроса к Google нельзя, а сам поток всё равно
+    не убить.
+    """
+    if build is None:
+        return
+    if not build.done():
+        done, _ = await asyncio.wait({build}, timeout=grace)
+        if not done:
+            logger.warning(
+                "build thread still running %.0fs after being abandoned; "
+                "its scratch directory is removed underneath it",
+                grace,
+            )
+            return
+    if not build.cancelled():
+        # Достать исключение (обычно BuildAbandoned), чтобы asyncio не жаловался
+        # на «exception was never retrieved».
+        build.exception()
 
 
 async def _say(request: Request, text: str) -> None:

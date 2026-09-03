@@ -7,6 +7,7 @@ import pytest
 
 from anki_deck_gen.build.audio import AudioCache
 from anki_deck_gen.build.package import build_package, deck_id_for, deck_name_for
+from anki_deck_gen.build.slug import slug
 from anki_deck_gen.domain import AudioSide, BuildRequest, DeckSettings, Fix, Sheet, Table
 from anki_deck_gen.errors import BuildAbandoned, MissingColumns, TableUnreadable
 from anki_deck_gen.notetypes.base import ANKI_NAME_SUFFIX
@@ -107,9 +108,8 @@ def test_audio_fields_and_media_follow_the_audio_side(tmp_path: Path) -> None:
     )
     contents = read_apkg(result.path)
     assert result.summary.media_files == 4
-    assert sorted(contents.media) == sorted(
-        ["how_are_you.mp3", "как_дела.mp3", "bye.mp3", "пока.mp3"]
-    )
+    expected = [f"{slug(text)}.mp3" for text in ("How are you?", "Как дела?", "Bye", "Пока")]
+    assert sorted(contents.media) == sorted(expected)
     for fields in contents.fields:
         assert fields[2].startswith("[sound:") and fields[3].startswith("[sound:")
     assert progress == [(1, 2), (2, 2)]
@@ -125,7 +125,7 @@ def test_question_only_audio_leaves_the_answer_field_empty(tmp_path: Path) -> No
         audio_cache=FakeAudioCache(tmp_path / "media"),
     )
     (fields,) = read_apkg(result.path).fields
-    assert fields[2] == "[sound:a.mp3]"
+    assert fields[2] == f"[sound:{slug('a')}.mp3]"
     assert fields[3] == ""
 
 
@@ -213,3 +213,22 @@ def test_duplicates_are_counted_in_the_summary(tmp_path: Path) -> None:
     )
     assert result.summary.duplicates == 1
     assert result.summary.notes == 2
+
+
+def test_media_dir_never_leaks_files_from_outside(tmp_path: Path) -> None:
+    """Таблица недоверенная: абсолютные пути, `..` и симлинки наружу — не пакуются."""
+    from anki_deck_gen.build.package import _images_in
+
+    media = tmp_path / "media"
+    media.mkdir()
+    (media / "ok.png").write_bytes(b"\x89PNG")
+    secret = tmp_path / "secret.txt"
+    secret.write_text("shh", encoding="utf-8")
+    (media / "link.png").symlink_to(secret)
+    row = make_row(
+        2,
+        f'<img src="ok.png"> <img src="{secret}"> <img src="../secret.txt"> <img src="link.png">',
+        "ответ",
+    )
+    found = sorted(p.name for p in _images_in(row, media))
+    assert found == ["ok.png"]

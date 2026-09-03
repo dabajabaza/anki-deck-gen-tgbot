@@ -68,7 +68,10 @@ async def invite(
     await message.answer(
         texts.INVITE_LINK.format(hours=access.INVITE_TTL_SECONDS // 3600, link=link)
     )
-    logger.info("invite issued: admin=%s code=%s", message.from_user.id, code)
+    # Код — bearer-секрет на 48 часов; в лог идёт только факт и автор.
+    logger.info(
+        "invite issued: admin=%s ttl=%sh", message.from_user.id, access.INVITE_TTL_SECONDS // 3600
+    )
 
 
 @router.message(Command("allow"))

@@ -107,3 +107,14 @@ async def test_clearing_state_and_data_drops_the_key() -> None:
     assert len(storage) == 1, "data still there"
     await storage.set_data(_key(1), {})
     assert len(storage) == 0
+
+
+async def test_reading_a_key_keeps_it_from_eviction() -> None:
+    """Живой диалог (его читают) не вытесняется раньше давно забытого."""
+    storage = BoundedMemoryStorage(max_keys=2)
+    await storage.set_state(_key(1), "fixing")
+    await storage.set_state(_key(2), "fixing")
+    assert await storage.get_state(_key(1)) == "fixing"  # активность ключа 1
+    await storage.set_state(_key(3), "fixing")
+    assert await storage.get_state(_key(2)) is None, "the least recently USED key goes"
+    assert await storage.get_state(_key(1)) == "fixing"

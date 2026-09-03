@@ -61,6 +61,10 @@ class BoundedMemoryStorage(BaseStorage):
         self._drop_if_empty(key)
 
     async def get_state(self, key: StorageKey) -> str | None:
+        # Чтение живого диалога — тоже активность: иначе вытеснялся бы тот,
+        # кто дольше всех НЕ ПИСАЛ, а не тот, кто дольше всех не появлялся.
+        if key in self._states:
+            self._states.move_to_end(key)
         return self._states.get(key)
 
     async def set_data(self, key: StorageKey, data: Mapping[str, Any]) -> None:
@@ -69,6 +73,8 @@ class BoundedMemoryStorage(BaseStorage):
         self._drop_if_empty(key)
 
     async def get_data(self, key: StorageKey) -> dict[str, Any]:
+        if key in self._states:
+            self._states.move_to_end(key)
         return dict(self._data.get(key, {}))
 
     async def close(self) -> None:

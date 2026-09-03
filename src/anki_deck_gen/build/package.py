@@ -151,10 +151,18 @@ def deck_id_for(name: str) -> int:
 
 
 def _images_in(row: Row, media_dir: Path) -> Iterable[Path]:
-    """Картинки `<img src="…">` из полей строки, которые реально лежат в media_dir."""
+    """Картинки `<img src="…">` из полей строки — только те, что лежат ВНУТРИ media_dir.
+
+    Таблица — недоверенный ввод: `src="/etc/hostname"` или `src="../secret"` не должны
+    уехать в .apkg, который человек потом кому-то отправит. Абсолютные пути отвергаются
+    сразу, остальное проверяется после resolve() — так же отсекается симлинк наружу.
+    """
+    root = media_dir.resolve()
     texts = [row.question, row.answer, *row.extra.values()]
     for text in texts:
         for filename in _IMG_SRC.findall(text):
-            candidate = media_dir / filename
-            if candidate.is_file():
+            if not filename or Path(filename).is_absolute() or filename.startswith(("\\", "//")):
+                continue
+            candidate = (media_dir / filename).resolve()
+            if candidate.is_file() and candidate.is_relative_to(root):
                 yield candidate

@@ -7,7 +7,7 @@
 import logging
 
 from aiogram import Bot
-from aiogram.types import InlineKeyboardMarkup
+from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
 
 from anki_deck_gen import notetypes
 from anki_deck_gen.bot import keyboards, texts
@@ -116,3 +116,15 @@ def error_text(exc: Exception, settings: BotSettings) -> str:
     if isinstance(exc, TtsUnavailable):
         return texts.ERR_TTS
     return texts.ERR_BUILD_FAILED
+
+
+def is_stale(callback: CallbackQuery, pending: Pending) -> bool:
+    """Кнопка с прошлого статус-сообщения не должна управлять новой Таблицей (A3).
+
+    Pending ищется по пользователю, и старая клавиатура иначе применила бы свои
+    языки и озвучку к таблице, присланной позже.
+    """
+    message = callback.message
+    if not isinstance(message, Message):
+        return True
+    return message.message_id != pending.status_message_id
