@@ -34,16 +34,24 @@ def _message_of(callback: CallbackQuery) -> Message | None:
 
 
 async def _current(
-    callback: CallbackQuery, pending: PendingStore, settings: BotSettings
+    callback: CallbackQuery, pending: PendingStore, settings: BotSettings, state: FSMContext
 ) -> Pending | None:
-    """Pending этого человека — если кнопка с его ТЕКУЩЕГО статус-сообщения."""
-    item = pending.touch(callback.from_user.id)
+    """Pending этого человека — если кнопка с его ТЕКУЩЕГО статус-сообщения.
+
+    Порядок важен: сначала смотрим без побочных эффектов (`get`), продлеваем TTL
+    только принятому нажатию — отклонённая кнопка мёртвой клавиатуры не шаг диалога.
+    Истёкший Pending заодно закрывает диалог: иначе человек оставался бы в
+    FixRows и получал «устарела» ещё и на следующий текст.
+    """
+    item = pending.get(callback.from_user.id)
     if item is None:
+        await state.clear()
         await _expired(callback, settings)
         return None
     if is_stale(callback, item):
         await callback.answer(texts.ERR_UNKNOWN_BUTTON, show_alert=True)
         return None
+    pending.touch(callback.from_user.id)
     return item
 
 
@@ -65,7 +73,7 @@ async def start_fixing(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = await _current(callback, pending, settings)
+    item = await _current(callback, pending, settings, state)
     if item is None:
         return
     unresolved = item.unresolved()
@@ -87,7 +95,7 @@ async def skip_all(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = await _current(callback, pending, settings)
+    item = await _current(callback, pending, settings, state)
     if item is None:
         return
     for problem in item.unresolved():
@@ -105,7 +113,7 @@ async def cancel_table(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = await _current(callback, pending, settings)
+    item = await _current(callback, pending, settings, state)
     if item is None:
         return
     pending.pop(callback.from_user.id)
@@ -121,7 +129,7 @@ async def ask_rename(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = await _current(callback, pending, settings)
+    item = await _current(callback, pending, settings, state)
     if item is None:
         return
     await state.set_state(Rename.waiting)

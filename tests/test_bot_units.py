@@ -118,3 +118,32 @@ async def test_reading_a_key_keeps_it_from_eviction() -> None:
     await storage.set_state(_key(3), "fixing")
     assert await storage.get_state(_key(2)) is None, "the least recently USED key goes"
     assert await storage.get_state(_key(1)) == "fixing"
+
+
+def test_is_stale_compares_chat_and_message() -> None:
+    from datetime import UTC, datetime
+
+    from aiogram.types import CallbackQuery, Chat, Message, User
+
+    from anki_deck_gen.bot.views import is_stale
+
+    item = _pending()  # chat_id=1, status_message_id=1
+
+    def press(chat_id: int, message_id: int) -> CallbackQuery:
+        message = Message(
+            message_id=message_id,
+            date=datetime.now(UTC),
+            chat=Chat(id=chat_id, type="private"),
+            text="status",
+        )
+        return CallbackQuery(
+            id="c",
+            from_user=User(id=1, is_bot=False, first_name="t"),
+            chat_instance="i",
+            message=message,
+            data="nt:basic",
+        )
+
+    assert not is_stale(press(1, 1), item)
+    assert is_stale(press(1, 2), item)
+    assert is_stale(press(2, 1), item), "same message id in another chat is not ours"

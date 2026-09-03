@@ -221,7 +221,22 @@ async def test_timeout_waits_for_the_thread_before_cleanup_and_next_request(tmp_
     names = [name for name, _ in events]
     assert names == ["first_end", "second_start"], names
     assert first_saw_scratch_alive.is_set(), "scratch was removed underneath the running thread"
-    assert "Не успел" in session.edit_texts()[-3] or any(
-        "Не успел" in t for t in session.edit_texts()
-    )
+    # Вердикт о таймауте идёт сразу за «Собираю…» первого задания — до ожидания потока.
+    edits = session.edit_texts()
+    assert edits[:2] == [texts.BUILDING, texts.ERR_TIMED_OUT.format(minutes=0)], edits
     assert len(session.calls_of(SendDocument)) == 1
+
+
+async def test_a_real_failure_in_an_abandoned_thread_is_logged(
+    tmp_path: Path, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Поток, упавший не по флагу (например, 429), оставляет след в логе."""
+
+    def build(request: BuildRequest, *, abandoned: threading.Event, **kwargs: Any) -> BuildResult:
+        while not abandoned.wait(0.01):
+            pass
+        raise TtsUnavailable("429 Too Many Requests")
+
+    with caplog.at_level("WARNING", logger="anki_deck_gen.runtime.worker"):
+        await _run_one(tmp_path, build, job_timeout_s=1)
+    assert any("abandoned build failed" in m and "429" in m for m in caplog.messages)

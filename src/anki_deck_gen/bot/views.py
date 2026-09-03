@@ -127,4 +127,6 @@ def is_stale(callback: CallbackQuery, pending: Pending) -> bool:
     message = callback.message
     if not isinstance(message, Message):
         return True
-    return message.message_id != pending.status_message_id
+    # id сообщений уникальны только внутри чата — сравниваем и чат, хотя сегодня бот
+    # только в личке (PrivateChatOnlyMiddleware): помощник не должен зависеть от этого.
+    return message.chat.id != pending.chat_id or message.message_id != pending.status_message_id

@@ -6,6 +6,7 @@
 """
 
 import hashlib
+import logging
 import random
 import re
 import sys
@@ -31,6 +32,7 @@ from anki_deck_gen.errors import BuildAbandoned, MissingColumns, TableUnreadable
 from anki_deck_gen.tables.validate import apply, validate
 
 _IMG_SRC = re.compile(r'<img\s+[^>]*src="([^"]+)"')
+logger = logging.getLogger(__name__)
 
 
 def build_package(
@@ -77,15 +79,25 @@ def build_package(
     media: set[Path] = set()
     grouped: dict[str, list[genanki.Note]] = {}
 
-    for row in rows:
+    def check_abandoned() -> None:
+        # Перед каждым запросом к Google, а не раз на строку: при озвучке обеих сторон
+        # строка — два запроса, и воркер ждёт выхода потока ровно одну «фразу».
         if abandoned is not None and abandoned.is_set():
             raise BuildAbandoned()
+
+    # Каталог — в начале, а не перед записью: воркер сносит scratch после того, как
+    # брошенный поток вышел, и mkdir в конце воскресил бы уже удалённый каталог.
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    for row in rows:
+        check_abandoned()
         audio_q = audio_a = ""
         if settings.audio.question:
             path = cache.ensure(row.question, settings.lang_q)
             media.add(path)
             audio_q = sound_tag(path)
         if settings.audio.answer:
+            check_abandoned()
             path = cache.ensure(row.answer, settings.lang_a)
             media.add(path)
             audio_a = sound_tag(path)
@@ -113,7 +125,7 @@ def build_package(
             deck.add_note(note)
         decks.append(deck)
 
-    out_dir.mkdir(parents=True, exist_ok=True)
+    check_abandoned()
     path = out_dir / apkg_filename(request.deck_name)
     package = genanki.Package(decks, media_files=[str(p) for p in sorted(media)])
     package.write_to_file(str(path))
@@ -154,15 +166,22 @@ def _images_in(row: Row, media_dir: Path) -> Iterable[Path]:
     """Картинки `<img src="…">` из полей строки — только те, что лежат ВНУТРИ media_dir.
 
     Таблица — недоверенный ввод: `src="/etc/hostname"` или `src="../secret"` не должны
-    уехать в .apkg, который человек потом кому-то отправит. Абсолютные пути отвергаются
-    сразу, остальное проверяется после resolve() — так же отсекается симлинк наружу.
+    уехать в .apkg, который человек потом кому-то отправит. Решение о допуске — по
+    разрешённому пути (так отсекается и симлинк наружу), а отдаётся НЕразрешённый:
+    genanki кладёт файл в архив под basename, и он обязан совпасть с тем, что написано
+    в `src`, иначе симлинк `cat.png → photos/cat-hires.png` даст битую картинку.
+    Отвергнутое — в лог: иначе не отличить от опечатки в имени.
     """
     root = media_dir.resolve()
     texts = [row.question, row.answer, *row.extra.values()]
     for text in texts:
         for filename in _IMG_SRC.findall(text):
-            if not filename or Path(filename).is_absolute() or filename.startswith(("\\", "//")):
+            candidate = media_dir / filename
+            resolved = candidate.resolve()
+            if not resolved.is_relative_to(root):
+                logger.info("image %r rejected: outside %s", filename, media_dir)
                 continue
-            candidate = (media_dir / filename).resolve()
-            if candidate.is_file() and candidate.is_relative_to(root):
-                yield candidate
+            if not candidate.is_file():
+                logger.info("image %r not found in %s", filename, media_dir)
+                continue
+            yield candidate

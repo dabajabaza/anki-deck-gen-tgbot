@@ -452,3 +452,41 @@ async def test_max_notes_counts_fixed_rows_too(harness: BotHarness) -> None:
     assert harness.queue.load == 0
     assert harness.session.last_edit_text() == texts.ERR_TOO_MANY_ROWS.format(count=3, limit=2)
     assert harness.pending.get(ADMIN_ID) is None
+
+
+async def test_cancel_on_an_expired_table_also_closes_the_fix_dialog(harness: BotHarness) -> None:
+    harness.loader.tables["p.xlsx"] = _table_with_problems()
+    await harness.send_document("p.xlsx", user_id=ADMIN_ID)
+    await harness.press(callbacks.PROBLEMS_FIX, user_id=ADMIN_ID)
+    item = harness.pending.get(ADMIN_ID)
+    assert item is not None
+    status_id = item.status_message_id
+    item.deadline = 0.0  # истёк
+    harness.session.clear()
+    await harness.press(callbacks.PROBLEMS_CANCEL, user_id=ADMIN_ID, message_id=status_id)
+    assert "Таблица устарела" in harness.session.last_edit_text()
+    harness.session.clear()
+    # Диалог закрыт: текст идёт в fallback, а не в правку строк.
+    await harness.send("пёс", user_id=ADMIN_ID)
+    assert harness.session.last_text() == texts.ERR_UNSUPPORTED
+
+
+async def test_a_stale_press_does_not_extend_the_current_table(harness: BotHarness) -> None:
+    harness.loader.tables["old.xlsx"] = make_table(("a", "б"), title="old")
+    harness.loader.tables["new.xlsx"] = make_table(("c", "д"), title="new")
+    await harness.send_document("old.xlsx", user_id=ADMIN_ID)
+    old_item = harness.pending.get(ADMIN_ID)
+    assert old_item is not None
+    old_status = old_item.status_message_id
+    await harness.send_document("new.xlsx", user_id=ADMIN_ID)
+    item = harness.pending.get(ADMIN_ID)
+    assert item is not None
+    from time import monotonic
+
+    marker = monotonic() + 100.0  # живой, но короче полного TTL — продление заметно
+    item.deadline = marker
+    await harness.press(callbacks.note_type("basic"), user_id=ADMIN_ID, message_id=old_status)
+    await harness.press(callbacks.PROBLEMS_FIX, user_id=ADMIN_ID, message_id=old_status)
+    assert item.deadline == marker, "a refused press must not touch the TTL"
+    await harness.press(callbacks.note_type("basic"), user_id=ADMIN_ID)
+    assert item.deadline > marker, "an accepted press extends it"
