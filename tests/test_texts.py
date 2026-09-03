@@ -1,9 +1,10 @@
-"""Строки бота: непустые, без разметки, с плейсхолдерами, которые кто-то подставляет."""
+"""Строки бота: непустые, без разметки (кроме HELP), плейсхолдеры кто-то подставляет."""
 
+import re
 import string
 
 from anki_deck_gen.bot import texts
-from anki_deck_gen.domain import AudioSide, DeckSettings, Summary
+from anki_deck_gen.domain import AudioSide, DeckSettings, Summary, Theme
 
 # Каждому плейсхолдеру — хоть один вызывающий. Новый {name} без строки здесь
 # означает, что либо текст, либо вызов написан с опечаткой.
@@ -55,11 +56,35 @@ def test_every_string_is_non_empty() -> None:
         assert value.strip(), name
 
 
+# Единственные тексты с HTML: идут с parse_mode=HTML из handlers/start.py (A11).
+HTML_TEXTS = {"HELP", "HELP_EXAMPLE"}
+_ALLOWED_TAGS = re.compile(r"</?b>|<a href=\"[^\"<>]*\">|</a>")
+
+
 def test_no_markup_sneaks_in() -> None:
     # Бот шлёт простой текст без parse_mode: «<b>» показался бы буквально.
     for name, value in _constants().items():
+        if name in HTML_TEXTS:
+            continue
         assert "<" not in value and ">" not in value, name
         assert "**" not in value and "__" not in value, name
+
+
+def test_help_uses_only_bold_and_links_and_closes_them() -> None:
+    for name in HTML_TEXTS:
+        value = getattr(texts, name)
+        stripped = _ALLOWED_TAGS.sub("", value)
+        assert "<" not in stripped and ">" not in stripped and "&" not in stripped, name
+        assert value.count("<b>") == value.count("</b>"), name
+        assert value.count("<a href") == value.count("</a>"), name
+
+
+def test_help_message_escapes_the_example_url() -> None:
+    url = 'https://example.com/?a=1&b="x"'
+    message = texts.help_message(url)
+    assert 'href="https://example.com/?a=1&amp;b=&quot;x&quot;"' in message
+    assert "▫️ /template" in message
+    assert "Пример готовой таблицы" not in texts.help_message(None)
 
 
 def test_placeholders_are_known() -> None:
@@ -94,8 +119,11 @@ def test_verdict_reads_well() -> None:
     assert "90 аудиофайлов" in text and "пропущено строк: 1" in text
 
 
-def test_settings_description_names_the_voiced_side() -> None:
+def test_settings_description_names_the_voiced_side_and_the_theme() -> None:
     both = DeckSettings(note_type_id="basic", lang_q="en", lang_a="ru", audio=AudioSide.BOTH)
-    assert texts.settings_description(both) == "English → Русский, озвучены обе стороны"
-    answer = DeckSettings(note_type_id="basic", lang_q="en", lang_a="ru", audio=AudioSide.ANSWER)
-    assert texts.settings_description(answer) == "English → Русский, озвучен Русский"
+    assert texts.audio_description(both) == "English → Русский, озвучены обе стороны"
+    assert texts.settings_description(both) == "English → Русский, озвучены обе стороны · Карточка"
+    answer = DeckSettings(
+        note_type_id="basic", lang_q="en", lang_a="ru", audio=AudioSide.ANSWER, theme=Theme.BOOK
+    )
+    assert texts.settings_description(answer) == "English → Русский, озвучен Русский · Учебник"

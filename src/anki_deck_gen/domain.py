@@ -35,6 +35,13 @@ class AudioSide(StrEnum):
         return self in (AudioSide.ANSWER, AudioSide.BOTH)
 
 
+class Theme(StrEnum):
+    """Оформление карточек — какой CSS получит Тип записи. Коды — для CLI и callback_data."""
+
+    CARD = "card"  # «Карточка»: светлая панель с тенью на сером фоне
+    BOOK = "book"  # «Учебник»: антиква на бумажном фоне
+
+
 # Адрес строки внутри Таблицы: имя листа (None у csv и текста) и номер строки,
 # как его видит человек в редакторе (1-based, заголовок — строка 1).
 RowKey = tuple[str | None, int]
@@ -132,12 +139,13 @@ class Fix:
 
 @dataclass(frozen=True)
 class DeckSettings:
-    """Всё, что бот спрашивает перед сборкой: Тип записи, Языки, Озвучка."""
+    """Всё, что бот спрашивает перед сборкой: Тип записи, Языки, Озвучка, Оформление."""
 
     note_type_id: str
     lang_q: str  # код языка вопроса для gTTS, напр. "en"
     lang_a: str  # код языка ответа, напр. "ru"
     audio: AudioSide
+    theme: Theme = Theme.CARD
 
 
 @dataclass(frozen=True)

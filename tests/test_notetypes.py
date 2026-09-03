@@ -1,8 +1,9 @@
 """Типы записей: стоковые шаблоны Anki байт в байт, реестр и совместимость с колонками."""
 
 from anki_deck_gen import notetypes
+from anki_deck_gen.domain import Theme
 from anki_deck_gen.errors import UnknownNoteType
-from anki_deck_gen.notetypes import stock
+from anki_deck_gen.notetypes import stock, theme
 from anki_deck_gen.notetypes.base import ANKI_NAME_SUFFIX
 from tests.helpers.tables import make_row
 
@@ -48,9 +49,29 @@ def test_the_typing_question_side_never_plays_the_answer_audio() -> None:
     assert stock.AUDIO_FRONT in card["qfmt"]
 
 
-def test_stock_types_use_the_stock_css() -> None:
+def test_stock_types_take_their_css_from_the_chosen_theme() -> None:
     for note_type_id in ("basic", "basic-reversed", "basic-typing"):
-        assert notetypes.get(note_type_id).css() == stock.STOCK_CSS
+        note_type = notetypes.get(note_type_id)
+        assert note_type.themed
+        assert note_type.css(Theme.CARD) == theme.CARD_CSS
+        assert note_type.css(Theme.BOOK) == theme.BOOK_CSS
+
+
+def test_every_theme_styles_night_mode_the_answer_rule_and_the_audio_button() -> None:
+    """Классы и элементы, которые Anki гарантирует: .card на body, nightMode, hr#answer, replay."""
+    for value in Theme:
+        css = theme.css_for(value)
+        assert ".card {" in css and ".card.nightMode {" in css
+        assert "hr#answer" in css
+        assert ".replay-button svg" in css and ".replay-button span svg" in css, "AnkiDroid"
+        assert "input#typeans" in css and "!important" in css
+
+
+def test_the_vietnamese_type_keeps_its_own_css_regardless_of_theme() -> None:
+    vietnamese = notetypes.get("vietnamese")
+    assert not vietnamese.themed
+    assert vietnamese.css(Theme.CARD) == vietnamese.css(Theme.BOOK)
+    assert "ayuthaya" in vietnamese.css(Theme.CARD)
 
 
 def test_stock_fields_are_front_back_plus_two_audio_fields() -> None:

@@ -13,7 +13,7 @@ from `clipivore-tgbot` (`~/Projects/twitter-dl-tgbot`); access/invites from
 `lesson-tracker-tgbot`.
 
 **Run bot:** `uv run python -m anki_deck_gen` (needs `.env`, see `.env.example`).
-**Run CLI:** `uv run anki-deck-gen --source … --note-type … --lang-pair … --audio-for …`.
+**Run CLI:** `uv run anki-deck-gen --source … --note-type … --lang-pair … --audio-for … --theme card|book`.
 **Checks:** `uv run ruff check . && uv run ruff format --check . && uv run mypy src tests && uv run pytest -q`.
 
 ## Layout
@@ -47,8 +47,13 @@ prefs), `bot/` (aiogram: handlers, texts, keyboards, pending, storage, middlewar
   otherwise. Old generator ids (2163323615/16/18, 1759261800, 1762620000) are retired.
 - **`access.py` needs `db/engine.py::create_db`** (`isolation_level=None` for SAVEPOINT,
   `READONLY` execution option for the per-update auth check). Do not swap the engine.
-- **Texts are plain, Russian, in `bot/texts.py`.** No parse_mode anywhere;
-  `tests/test_texts.py` rejects `<`/`>` and unknown placeholders.
+- **Texts are plain, Russian, in `bot/texts.py`.** No parse_mode anywhere except `HELP`
+  (HTML, sent from `handlers/start.py` with link preview disabled; the example URL is
+  escaped). `tests/test_texts.py` rejects `<`/`>` elsewhere and unknown placeholders.
+- **Card CSS lives in `notetypes/theme.py`** (`Theme.CARD`/`Theme.BOOK`), not in the note
+  types. Changing CSS needs no new `model_id` (Anki updates a same-schema type on import
+  when mtime is newer); `themed = False` on a type skips the theme step in the bot.
+  Callback data must stay ≤ 64 bytes — the longest is `t:<type>:<lq>-<la>:<audio>:<theme>`.
 - **Tests are hermetic:** `conftest.hermetic_env` chdirs away and drops env vars —
   pydantic-settings resolves `.env` against cwd.
 - **The server is FreeBSD without a Rust toolchain.** Compiled deps are pinned to ports

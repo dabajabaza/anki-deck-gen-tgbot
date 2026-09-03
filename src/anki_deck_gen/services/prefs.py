@@ -8,7 +8,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from anki_deck_gen.db.models import UserPref
-from anki_deck_gen.domain import AudioSide, DeckSettings
+from anki_deck_gen.domain import AudioSide, DeckSettings, Theme
 from anki_deck_gen.timeutils import now_ts
 
 
@@ -21,7 +21,16 @@ async def get_last(session: AsyncSession, user_id: int) -> DeckSettings | None:
         lang_q=row.lang_q,
         lang_a=row.lang_a,
         audio=AudioSide(row.audio),
+        theme=_theme(row.theme),
     )
+
+
+def _theme(value: str) -> Theme:
+    """Тема, снятая из репертуара (или битая), не должна ломать «Как в прошлый раз»."""
+    try:
+        return Theme(value)
+    except ValueError:
+        return Theme.CARD
 
 
 async def save_last(session: AsyncSession, user_id: int, settings: DeckSettings) -> None:
@@ -34,5 +43,6 @@ async def save_last(session: AsyncSession, user_id: int, settings: DeckSettings)
     row.lang_q = settings.lang_q
     row.lang_a = settings.lang_a
     row.audio = settings.audio.value
+    row.theme = settings.theme.value
     row.updated_at = now_ts()
     await session.flush()

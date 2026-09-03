@@ -8,7 +8,7 @@ Tips / Dialect / Note / Example необязательны. Пример тог�
 
 import re
 
-from anki_deck_gen.domain import Row
+from anki_deck_gen.domain import Row, Theme
 from anki_deck_gen.notetypes.base import NoteType, register
 
 COL_TIPS = "Tips"
@@ -213,6 +213,7 @@ class Vietnamese(NoteType):
     model_id = 1756900004
     cards_per_note = 2
     optional_columns = frozenset({COL_TIPS, COL_DIALECT, COL_NOTE, COL_EXAMPLE})
+    themed = False
 
     def fields(self) -> list[str]:
         return [
@@ -232,7 +233,8 @@ class Vietnamese(NoteType):
             {"name": "Английский → Вьетнамский", "qfmt": EN_TO_VI_QFMT, "afmt": EN_TO_VI_AFMT},
         ]
 
-    def css(self) -> str:
+    def css(self, theme: Theme) -> str:
+        # Свой CSS из старых шаблонов; Оформление сюда не применяется (themed = False).
         return CSS
 
     def note_fields(self, row: Row, *, audio_q: str, audio_a: str) -> list[str]:

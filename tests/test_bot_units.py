@@ -5,7 +5,15 @@ from aiogram.fsm.storage.base import StorageKey
 from anki_deck_gen.bot import callbacks
 from anki_deck_gen.bot.pending import Pending, PendingStore
 from anki_deck_gen.bot.storage import BoundedMemoryStorage
-from anki_deck_gen.domain import AudioSide, DeckSettings, Fix, Problem, ProblemRow, Validation
+from anki_deck_gen.domain import (
+    AudioSide,
+    DeckSettings,
+    Fix,
+    Problem,
+    ProblemRow,
+    Theme,
+    Validation,
+)
 from tests.helpers.factories import make_row, make_table
 
 # ---------- callback_data ----------
@@ -13,22 +21,40 @@ from tests.helpers.factories import make_row, make_table
 
 def test_the_longest_callback_fits_telegram_limit() -> None:
     longest = DeckSettings(
-        note_type_id="basic-reversed", lang_q="en", lang_a="ru", audio=AudioSide.BOTH
+        note_type_id="basic-reversed",
+        lang_q="en",
+        lang_a="ru",
+        audio=AudioSide.BOTH,
+        theme=Theme.BOOK,
     )
-    assert len(callbacks.settings(longest).encode()) <= callbacks.CALLBACK_DATA_LIMIT
-    assert len(callbacks.settings(longest).encode()) == 27
+    assert len(callbacks.build(longest).encode()) <= callbacks.CALLBACK_DATA_LIMIT
+    assert len(callbacks.build(longest).encode()) == 32
 
 
-def test_settings_roundtrip() -> None:
+def test_build_roundtrip_keeps_the_theme() -> None:
     value = DeckSettings(
-        note_type_id="vietnamese", lang_q="vi", lang_a="en", audio=AudioSide.QUESTION
+        note_type_id="vietnamese",
+        lang_q="vi",
+        lang_a="en",
+        audio=AudioSide.QUESTION,
+        theme=Theme.BOOK,
     )
+    parsed = callbacks.parse(callbacks.build(value))
+    assert parsed is not None and parsed.action == "t" and parsed.deck_settings() == value
+
+
+def test_settings_step_carries_no_theme_and_defaults_to_card() -> None:
+    value = DeckSettings(note_type_id="basic", lang_q="en", lang_a="ru", audio=AudioSide.NONE)
     parsed = callbacks.parse(callbacks.settings(value))
-    assert parsed is not None and parsed.deck_settings() == value
+    assert parsed is not None and parsed.action == "s" and parsed.theme is None
+    assert parsed.deck_settings() == value  # theme=Theme.CARD по умолчанию
 
 
 def test_garbage_is_not_parsed() -> None:
     assert callbacks.parse("s:basic:en-ru:loud") is None
+    assert callbacks.parse("t:basic:en-ru:both:neon") is None
+    assert callbacks.parse("t:basic:en-ru:both") is None, "a build needs its theme"
+    assert callbacks.parse("s:basic:en-ru:both:card") is None
     assert callbacks.parse("lp:basic") is None
     assert callbacks.parse("whatever") is None
 

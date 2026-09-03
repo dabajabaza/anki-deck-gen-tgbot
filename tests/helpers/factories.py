@@ -16,6 +16,7 @@ from anki_deck_gen.domain import (
     Sheet,
     Summary,
     Table,
+    Theme,
 )
 
 # Похож на настоящий токен, чтобы валидация aiogram прошла; занесён в allowlist
@@ -94,8 +95,11 @@ def make_settings(
     lang_q: str = "en",
     lang_a: str = "ru",
     audio: AudioSide = AudioSide.NONE,
+    theme: Theme = Theme.CARD,
 ) -> DeckSettings:
-    return DeckSettings(note_type_id=note_type_id, lang_q=lang_q, lang_a=lang_a, audio=audio)
+    return DeckSettings(
+        note_type_id=note_type_id, lang_q=lang_q, lang_a=lang_a, audio=audio, theme=theme
+    )
 
 
 def make_result(tmp_path: Path, *, deck_name: str = "Тест", notes: int = 2) -> BuildResult:

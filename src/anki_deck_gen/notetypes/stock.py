@@ -1,7 +1,8 @@
 """Стоковые шаблоны Anki — байт в байт.
 
-Источник: `ankitects/anki`, `rslib/src/notetype/stock.rs` и `styling.css`
-(проверено по исходникам 2026-09-03). Имена полей `Front`/`Back` в русской
+Источник: `ankitects/anki`, `rslib/src/notetype/stock.rs` (проверено по исходникам
+2026-09-03). Стоковый CSS (Arial 20px, чёрное на белом) не воспроизводится: стиль
+даёт notetypes/theme.py. Имена полей `Front`/`Back` в русской
 локализации Anki намеренно не переведены, так что и у русскоязычного
 пользователя стоковая «Простая» имеет ровно эти шаблоны — наши типы выглядят
 для него родными.
@@ -18,17 +19,6 @@ STOCK_REVERSE_AFMT = "{{FrontSide}}\n\n<hr id=answer>\n\n{{Front}}"
 
 STOCK_TYPE_QFMT = "{{Front}}\n\n{{type:Back}}"
 STOCK_TYPE_AFMT = "{{FrontSide}}\n\n<hr id=answer>\n\n{{type:Back}}"
-
-STOCK_CSS = (
-    ".card {\n"
-    "    font-family: arial;\n"
-    "    font-size: 20px;\n"
-    "    line-height: 1.5;\n"
-    "    text-align: center;\n"
-    "    color: black;\n"
-    "    background-color: white;\n"
-    "}\n"
-)
 
 # Имена шаблонов карточек — тоже из локализации (`notetypes-card-1-name`).
 CARD_1 = "Карточка 1"

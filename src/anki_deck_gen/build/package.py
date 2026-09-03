@@ -70,7 +70,7 @@ def build_package(
         note_type.anki_name(),
         fields=[{"name": name} for name in note_type.fields()],
         templates=note_type.templates(),
-        css=note_type.css(),
+        css=note_type.css(request.settings.theme),
     )
 
     need_audio = settings.audio is not AudioSide.NONE

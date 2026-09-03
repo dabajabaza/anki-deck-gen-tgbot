@@ -2,8 +2,8 @@
 
 Telegram даёт 64 байта на callback_data, и весь выбор Настроек колоды должен в
 них уместиться, чтобы между шагами не понадобилось FSM-состояние: тип записи,
-пара языков и сторона озвучки едут в самой кнопке. Самый длинный вариант —
-``s:basic-reversed:en-ru:both`` — 28 байт.
+пара языков, сторона озвучки и оформление едут в самой кнопке. Самый длинный
+вариант — ``t:basic-reversed:en-ru:both:book`` — 32 байта.
 
 Формат — свой, а не ``CallbackData`` aiogram: строк пять, разбор прозрачнее,
 чем фабрика с префиксами, и тест на длину пишется в одну строку.
@@ -11,7 +11,7 @@ Telegram даёт 64 байта на callback_data, и весь выбор На�
 
 from dataclasses import dataclass
 
-from anki_deck_gen.domain import AudioSide, DeckSettings
+from anki_deck_gen.domain import AudioSide, DeckSettings, Theme
 
 CALLBACK_DATA_LIMIT = 64
 
@@ -31,7 +31,7 @@ def note_type(note_type_id: str) -> str:
 
 
 def last_used(note_type_id: str) -> str:
-    """«Как в прошлый раз»: последние языки и озвучка с выбранным типом."""
+    """«Как в прошлый раз»: последние языки, озвучка и оформление с выбранным типом."""
     return f"last:{note_type_id}"
 
 
@@ -46,8 +46,16 @@ def language_pair(note_type_id: str, lang_q: str, lang_a: str) -> str:
 
 
 def settings(value: DeckSettings) -> str:
-    """Финальный выбор → Задание в очередь."""
+    """Выбраны Языки и Озвучка → показать Оформление. Тема в этой строке не едет."""
     return f"s:{value.note_type_id}:{value.lang_q}-{value.lang_a}:{value.audio.value}"
+
+
+def build(value: DeckSettings) -> str:
+    """Финальный выбор, с Оформлением → Задание в очередь."""
+    return (
+        f"t:{value.note_type_id}:{value.lang_q}-{value.lang_a}"
+        f":{value.audio.value}:{value.theme.value}"
+    )
 
 
 @dataclass(frozen=True)
@@ -59,14 +67,17 @@ class Parsed:
     lang_q: str | None = None
     lang_a: str | None = None
     audio: AudioSide | None = None
+    theme: Theme | None = None
 
     def deck_settings(self) -> DeckSettings:
+        """Настройки колоды; без темы (действие ``s``) — оформление по умолчанию."""
         assert self.note_type_id and self.lang_q and self.lang_a and self.audio
         return DeckSettings(
             note_type_id=self.note_type_id,
             lang_q=self.lang_q,
             lang_a=self.lang_a,
             audio=self.audio,
+            theme=self.theme or Theme.CARD,
         )
 
 
@@ -80,7 +91,7 @@ def parse(data: str) -> Parsed | None:
         if action == "lp" and len(parts) == 3:
             lang_q, lang_a = parts[2].split("-", 1)
             return Parsed(action=action, note_type_id=parts[1], lang_q=lang_q, lang_a=lang_a)
-        if action == "s" and len(parts) == 4:
+        if action in ("s", "t") and len(parts) == (4 if action == "s" else 5):
             lang_q, lang_a = parts[2].split("-", 1)
             return Parsed(
                 action=action,
@@ -88,6 +99,7 @@ def parse(data: str) -> Parsed | None:
                 lang_q=lang_q,
                 lang_a=lang_a,
                 audio=AudioSide(parts[3]),
+                theme=Theme(parts[4]) if action == "t" else None,
             )
     except ValueError:
         return None
