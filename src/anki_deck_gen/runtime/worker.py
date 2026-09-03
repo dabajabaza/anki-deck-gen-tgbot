@@ -185,7 +185,21 @@ class RequestWorker:
             # его на «Собираю…», значит соврать. Ожидание потока нужно только
             # ради сохранности scratch, оно идёт после.
             await _say(request, texts.ERR_TIMED_OUT.format(minutes=minutes))
-            await _settle(build, grace=self._abandon_grace_s)
+            try:
+                await _settle(build, grace=self._abandon_grace_s)
+            except asyncio.CancelledError:
+                # Остановка процесса пришла, пока мы ждали брошенный поток. Соседняя
+                # ветка `except CancelledError` сюда не сработает: исключение из
+                # блока except не передаётся другим except того же try. Поэтому
+                # короткое ожидание остановки — здесь же, иначе scratch снесётся
+                # под живым потоком молча, а его исключение пропадёт.
+                logger.warning(
+                    "shutdown interrupted the grace wait for %s; giving the build thread %ss",
+                    request.user_id,
+                    self._shutdown_grace_s,
+                )
+                await _settle(build, grace=self._shutdown_grace_s)
+                raise
         except asyncio.CancelledError:
             abandoned.set()
             await _settle(build, grace=self._shutdown_grace_s)
