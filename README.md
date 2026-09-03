@@ -1,4 +1,4 @@
-# anki-deck-gen-tgbot
+# Donald Deck
 
 Telegram-бот и CLI, которые делают колоды Anki из таблиц. Преподаватель заполняет
 таблицу в Google Sheets или Excel, присылает боту файл, ссылку или просто текст —
