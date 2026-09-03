@@ -240,3 +240,44 @@ async def test_a_real_failure_in_an_abandoned_thread_is_logged(
     with caplog.at_level("WARNING", logger="anki_deck_gen.runtime.worker"):
         await _run_one(tmp_path, build, job_timeout_s=1)
     assert any("abandoned build failed" in m and "429" in m for m in caplog.messages)
+
+
+async def test_shutdown_during_the_grace_wait_still_gives_the_thread_its_short_grace(
+    tmp_path: Path,
+) -> None:
+    """Отмена воркера внутри _settle: поток получает shutdown-grace, scratch не сносится под ним."""
+    thread_saw_scratch = threading.Event()
+    thread_done = threading.Event()
+
+    def build(
+        request: BuildRequest, *, out_dir: Path, abandoned: threading.Event, **kwargs: Any
+    ) -> BuildResult:
+        while not abandoned.wait(0.01):
+            pass
+        time.sleep(0.3)  # «дожёвываем запрос» уже после флага и после отмены воркера
+        if out_dir.exists():
+            thread_saw_scratch.set()
+        thread_done.set()
+        raise BuildAbandoned
+
+    session = RecordingSession()
+    bot = Bot(token=FAKE_BOT_TOKEN, session=session)
+    queue = RequestQueue(5)
+    worker = RequestWorker(
+        queue=queue,
+        bot=bot,
+        settings=build_settings(tmp_path, job_timeout_s=1),
+        build=build,
+        abandon_grace_s=30.0,  # без отмены ждали бы долго
+        shutdown_grace_s=3.0,
+    )
+    queue.submit(_request(bot))
+    task = asyncio.create_task(worker.run())
+    # Дождаться вердикта о таймауте: значит, воркер сидит в _settle.
+    async with asyncio.timeout(5):
+        while texts.ERR_TIMED_OUT.format(minutes=0) not in session.edit_texts():
+            await asyncio.sleep(0.02)
+    task.cancel()
+    await asyncio.gather(task, return_exceptions=True)
+    assert thread_done.wait(3)
+    assert thread_saw_scratch.is_set(), "rmtree must wait for the short shutdown grace"
