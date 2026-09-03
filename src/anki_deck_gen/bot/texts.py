@@ -2,15 +2,19 @@
 
 По-русски и простым текстом — без HTML и Markdown: ответы цитируют то, что бот не
 контролирует (имена листов, вопросы из таблицы, сообщения Google), и простой
-текст — единственный формат, который они не могут сломать. tests/test_texts.py
-следит, чтобы здесь не появилось разметки, а плейсхолдеры совпадали с тем, что
-подставляют вызывающие.
+текст — единственный формат, который они не могут сломать. Единственное
+исключение — HELP: он статичный, идёт с parse_mode=HTML и несёт жирные
+подзаголовки и ссылку словами; подставляемый в него URL экранируется.
+tests/test_texts.py следит, чтобы разметки не появилось где-то ещё, а
+плейсхолдеры совпадали с тем, что подставляют вызывающие.
 
 Словарь — из CONTEXT.md и русской локализации Anki: Запись, Карточка, Колода,
 Тип записи, Метка. Не «заметка», не «тег».
 """
 
-from anki_deck_gen.domain import AudioSide, DeckSettings, Problem, ProblemRow, Summary
+import html
+
+from anki_deck_gen.domain import AudioSide, DeckSettings, Problem, ProblemRow, Summary, Theme
 
 # --- команды -----------------------------------------------------------------
 
@@ -20,20 +24,21 @@ CMD_INVITE = "Ссылка-приглашение"
 CMD_ALLOW = "Допустить по id"
 CMD_ACCESS = "Кто допущен"
 
+# HTML: единственный текст с разметкой (см. докстринг модуля). Эмодзи — однотонные.
 HELP = (
-    "Я делаю колоды Anki из таблиц.\n\n"
-    "Пришлите таблицу одним из трёх способов:\n\n"
-    "1. файлом .xlsx или .csv;\n"
-    "2. ссылкой на Google Таблицу — откройте доступ «всем, у кого есть ссылка»;\n"
-    "3. текстом, по строке на карточку: «вопрос — ответ».\n\n"
-    "Первая строка таблицы — заголовок: колонки Q и A (или Вопрос и Ответ).\n"
-    "Необязательные колонки: Deck/Колода — подколода, Tags/Метки — метки через запятую.\n"
-    "Если листов несколько, каждый лист становится подколодой.\n\n"
-    "Дальше я спрошу тип записи (как в Anki) и языки для озвучки — и пришлю файл .apkg, "
-    "который открывается в Anki двойным щелчком.\n\n"
-    "/template — шаблон таблицы для заполнения.{example}"
+    "<b>Я делаю колоды Anki из таблиц.</b>\n\n"
+    "Пришлите таблицу одним из трёх способов:\n"
+    "1️⃣ файлом .xlsx или .csv;\n"
+    "2️⃣ ссылкой на Google Таблицу — откройте доступ «всем, у кого есть ссылка»;\n"
+    "3️⃣ текстом, по строке на карточку: «вопрос — ответ».\n\n"
+    "<b>Заголовок</b> — первая строка таблицы: колонки Q и A (или Вопрос и Ответ).\n"
+    "<b>Необязательные колонки:</b> Deck/Колода — подколода, Tags/Метки — метки через запятую.\n"
+    "<b>Несколько листов</b> — каждый лист становится подколодой.\n\n"
+    "Дальше я спрошу тип записи (как в Anki), языки для озвучки и оформление карточек — "
+    "и пришлю файл .apkg, который открывается в Anki двойным щелчком.\n\n"
+    "▫️ /template — шаблон таблицы для заполнения{example}"
 )
-HELP_EXAMPLE = "\nПример готовой таблицы: {url}"
+HELP_EXAMPLE = '\n▫️ Пример готовой таблицы: <a href="{url}">открыть в Google Таблицах</a>'
 WELCOME_INVITED = "Доступ открыт.\n\n"
 
 TEMPLATE_FILENAME = "anki-template.xlsx"
@@ -117,6 +122,7 @@ NOTE_TYPE_NEEDS = "• {label}: нужны колонки {columns}"
 CHOOSE_LANGUAGES = "Тип записи: {label}.\nЯзыки и озвучка:"
 CHOOSE_PAIR = "Тип записи: {label}.\nЯзык вопроса → язык ответа:"
 CHOOSE_AUDIO = "Тип записи: {label}. Языки: {pair}.\nЧто озвучить?"
+CHOOSE_THEME = "Тип записи: {label}. {description}.\nОформление карточек:"
 
 BTN_LANG_DEFAULT = "English → Русский, озвучен English"
 BTN_LANG_NONE = "Без озвучки"
@@ -127,6 +133,10 @@ BTN_AUDIO_Q = "Вопрос ({lang})"
 BTN_AUDIO_A = "Ответ ({lang})"
 BTN_AUDIO_BOTH = "Обе стороны"
 BTN_BACK = "← Назад"
+BTN_THEME_CARD = "Карточка — светлая карточка на сером фоне"
+BTN_THEME_BOOK = "Учебник — книжный шрифт на бумажном фоне"
+THEME_CARD = "Карточка"
+THEME_BOOK = "Учебник"
 
 LANG_NAMES = {
     "en": "English",
@@ -232,8 +242,16 @@ def pair_label(lang_q: str, lang_a: str) -> str:
     return f"{lang_name(lang_q)} → {lang_name(lang_a)}"
 
 
-def settings_description(settings: DeckSettings) -> str:
-    """Короткое описание Настроек для кнопки «Как в прошлый раз»."""
+def theme_name(theme: Theme) -> str:
+    return THEME_CARD if theme is Theme.CARD else THEME_BOOK
+
+
+def theme_button(theme: Theme) -> str:
+    return BTN_THEME_CARD if theme is Theme.CARD else BTN_THEME_BOOK
+
+
+def audio_description(settings: DeckSettings) -> str:
+    """Языки и озвучка словами: «English → Русский, озвучен English»."""
     pair = pair_label(settings.lang_q, settings.lang_a)
     if settings.audio is AudioSide.NONE:
         return f"{pair}, без озвучки"
@@ -241,6 +259,11 @@ def settings_description(settings: DeckSettings) -> str:
         return f"{pair}, озвучены обе стороны"
     voiced = settings.lang_q if settings.audio is AudioSide.QUESTION else settings.lang_a
     return f"{pair}, озвучен {lang_name(voiced)}"
+
+
+def settings_description(settings: DeckSettings) -> str:
+    """Короткое описание Настроек для кнопки «Как в прошлый раз»."""
+    return f"{audio_description(settings)} · {theme_name(settings.theme)}"
 
 
 def problem_reason(problem: Problem) -> str:
@@ -330,7 +353,9 @@ def verdict(result: Summary) -> str:
 
 
 def help_message(example_url: str | None) -> str:
-    return HELP.format(example=HELP_EXAMPLE.format(url=example_url) if example_url else "")
+    """HELP с примером таблицы, если он настроен. URL — единственная подстановка в HTML."""
+    example = HELP_EXAMPLE.format(url=html.escape(example_url, quote=True)) if example_url else ""
+    return HELP.format(example=example)
 
 
 def human_size(size_bytes: int) -> str:

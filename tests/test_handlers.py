@@ -4,10 +4,11 @@
 Сеть заменена RecordingSession, загрузчик Таблиц — FakeLoader.
 """
 
-from aiogram.methods import SendDocument
+from aiogram.methods import SendDocument, SendMessage
+from aiogram.types import LinkPreviewOptions
 
 from anki_deck_gen.bot import callbacks, texts
-from anki_deck_gen.domain import AudioSide, DeckSettings, Problem, Sheet, Table
+from anki_deck_gen.domain import AudioSide, DeckSettings, Problem, Sheet, Table, Theme
 from anki_deck_gen.errors import FileTooLarge, TableUnreadable
 from anki_deck_gen.services import access, prefs
 from tests.helpers.bot_harness import BotHarness
@@ -20,7 +21,9 @@ from tests.helpers.factories import (
     make_table,
 )
 
-NO_AUDIO = callbacks.settings(
+# Полный выбор одной кнопкой (шаг оформления уже пройден): так удобнее тестам,
+# которым нужно Задание в очереди, а не сам диалог.
+NO_AUDIO = callbacks.build(
     DeckSettings(note_type_id="basic", lang_q="en", lang_a="ru", audio=AudioSide.NONE)
 )
 
@@ -41,7 +44,11 @@ async def test_a_stranger_gets_silence(harness: BotHarness) -> None:
 
 async def test_an_admin_gets_help(harness: BotHarness) -> None:
     await harness.send("/help", user_id=ADMIN_ID)
-    assert texts.help_message(None) in harness.session.sent_texts()
+    assert harness.session.last_text() == texts.help_message(None)
+    sent = harness.session.calls_of(SendMessage)[-1]
+    assert sent.parse_mode == "HTML", "HELP is the one text with markup (A11)"
+    assert isinstance(sent.link_preview_options, LinkPreviewOptions)
+    assert sent.link_preview_options.is_disabled
 
 
 async def test_a_group_message_is_ignored(harness: BotHarness) -> None:
@@ -292,45 +299,64 @@ async def test_choosing_a_type_shows_languages_without_last_when_no_prefs(
 async def test_the_default_language_button_enqueues_and_saves_prefs(harness: BotHarness) -> None:
     harness.loader.tables["deck.xlsx"] = make_table(("a", "б"), ("c", "д"), title="deck")
     await harness.send_document("deck.xlsx", user_id=ADMIN_ID)
-    default = callbacks.settings(
-        DeckSettings(
-            note_type_id="basic-reversed", lang_q="en", lang_a="ru", audio=AudioSide.QUESTION
-        )
+    chosen = DeckSettings(
+        note_type_id="basic-reversed", lang_q="en", lang_a="ru", audio=AudioSide.QUESTION
     )
-    await harness.press(default, user_id=ADMIN_ID)
+    await harness.press(callbacks.settings(chosen), user_id=ADMIN_ID)
+    # Языки выбраны — остался шаг оформления, Задания в очереди ещё нет.
+    assert "Оформление карточек" in harness.session.last_edit_text()
+    assert "озвучен English" in harness.session.last_edit_text()
+    labels = harness.session.last_edit_labels()
+    assert texts.BTN_THEME_CARD in labels and texts.BTN_THEME_BOOK in labels
+    assert harness.queue.load == 0
 
+    await harness.press(callbacks.build(chosen), user_id=ADMIN_ID)
     request = await harness.take()
     assert request.build.deck_name == "deck"
     assert request.build.settings.note_type_id == "basic-reversed"
     assert request.build.settings.audio is AudioSide.QUESTION
+    assert request.build.settings.theme is Theme.CARD
     assert len(request.build.table.rows) == 2
     assert harness.pending.get(ADMIN_ID) is None, "pending ends when the request is queued"
     assert texts.QUEUED in harness.session.last_edit_text()
 
     async with harness.sessionmaker() as s:
         saved = await prefs.get_last(s, ADMIN_ID)
-    assert saved is not None and saved.lang_q == "en"
+    assert saved is not None and saved.lang_q == "en" and saved.theme is Theme.CARD
 
 
-async def test_last_used_button_appears_and_reuses_languages(harness: BotHarness) -> None:
+async def test_last_used_button_appears_and_reuses_languages_and_theme(
+    harness: BotHarness,
+) -> None:
     async with harness.sessionmaker() as s:
         await prefs.save_last(
             s,
             ADMIN_ID,
-            DeckSettings(note_type_id="basic", lang_q="vi", lang_a="en", audio=AudioSide.BOTH),
+            DeckSettings(
+                note_type_id="basic",
+                lang_q="vi",
+                lang_a="en",
+                audio=AudioSide.BOTH,
+                theme=Theme.BOOK,
+            ),
         )
         await s.commit()
     harness.loader.tables["deck.xlsx"] = make_table(("a", "б"), title="deck")
     await harness.send_document("deck.xlsx", user_id=ADMIN_ID)
     await harness.press(callbacks.note_type("basic-typing"), user_id=ADMIN_ID)
     labels = harness.session.last_edit_labels()
-    assert any("Как в прошлый раз" in label and "Tiếng Việt" in label for label in labels)
+    assert any(
+        "Как в прошлый раз" in label and "Tiếng Việt" in label and "Учебник" in label
+        for label in labels
+    )
 
+    # «Как в прошлый раз» — одна кнопка до очереди, без шага оформления.
     await harness.press(callbacks.last_used("basic-typing"), user_id=ADMIN_ID)
     request = await harness.take()
     assert request.build.settings.note_type_id == "basic-typing"
     assert request.build.settings.lang_q == "vi"
     assert request.build.settings.audio is AudioSide.BOTH
+    assert request.build.settings.theme is Theme.BOOK
 
 
 async def test_configure_walks_pairs_then_audio(harness: BotHarness) -> None:
@@ -341,10 +367,37 @@ async def test_configure_walks_pairs_then_audio(harness: BotHarness) -> None:
     await harness.press(callbacks.language_pair("basic", "de", "ru"), user_id=ADMIN_ID)
     assert "Deutsch → Русский" in harness.session.last_edit_text()
     assert texts.BTN_AUDIO_Q.format(lang="Deutsch") in harness.session.last_edit_labels()
-    chosen = DeckSettings(note_type_id="basic", lang_q="de", lang_a="ru", audio=AudioSide.ANSWER)
+    chosen = DeckSettings(
+        note_type_id="basic", lang_q="de", lang_a="ru", audio=AudioSide.ANSWER, theme=Theme.BOOK
+    )
+    await harness.press(callbacks.settings(chosen), user_id=ADMIN_ID)
+    assert "Оформление карточек" in harness.session.last_edit_text()
+    assert texts.BTN_BACK in harness.session.last_edit_labels()
+    await harness.press(callbacks.build(chosen), user_id=ADMIN_ID)
+    request = await harness.take()
+    assert request.build.settings == chosen
+
+
+async def test_back_from_the_theme_step_returns_to_the_audio_step(harness: BotHarness) -> None:
+    harness.loader.tables["deck.xlsx"] = make_table(("a", "б"), title="deck")
+    await harness.send_document("deck.xlsx", user_id=ADMIN_ID)
+    chosen = DeckSettings(note_type_id="basic", lang_q="de", lang_a="ru", audio=AudioSide.NONE)
+    await harness.press(callbacks.settings(chosen), user_id=ADMIN_ID)
+    await harness.press(callbacks.language_pair("basic", "de", "ru"), user_id=ADMIN_ID)
+    assert "Что озвучить?" in harness.session.last_edit_text()
+
+
+async def test_a_type_with_its_own_css_skips_the_theme_step(harness: BotHarness) -> None:
+    """Вьетнамский тип не темизируется — выбор озвучки сразу ставит Задание в очередь."""
+    harness.loader.tables["deck.xlsx"] = make_table(("a", "б"), title="deck")
+    await harness.send_document("deck.xlsx", user_id=ADMIN_ID)
+    chosen = DeckSettings(
+        note_type_id="vietnamese", lang_q="vi", lang_a="en", audio=AudioSide.QUESTION
+    )
     await harness.press(callbacks.settings(chosen), user_id=ADMIN_ID)
     request = await harness.take()
     assert request.build.settings == chosen
+    assert texts.QUEUED in harness.session.last_edit_text()
 
 
 async def test_fixes_and_skips_travel_with_the_request(harness: BotHarness) -> None:

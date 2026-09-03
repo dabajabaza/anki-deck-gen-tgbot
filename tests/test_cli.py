@@ -8,6 +8,7 @@ from pathlib import Path
 import pytest
 
 from anki_deck_gen import cli
+from tests.helpers.apkg import read_apkg
 
 LOCAL = Path(__file__).resolve().parents[1] / "local"
 
@@ -81,6 +82,19 @@ def test_text_source_builds_a_basic_deck(tmp_path: Path, monkeypatch: pytest.Mon
     assert code == 0
     notes, cards, names = _inspect(tmp_path / "o" / "звери.apkg")
     assert (notes, cards, names) == (2, 2, ["Звери"])
+
+
+def test_theme_flag_picks_the_css(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv("MEDIA_CACHE_DIR", str(tmp_path / "media"))
+    txt = tmp_path / "pairs.txt"
+    txt.write_text("cat — кот\ndog — пёс\n", encoding="utf-8")
+    out = tmp_path / "o"
+    code = cli.main(
+        ["--source", str(txt), "--deck-name", "Звери", "--output-dir", str(out), "--theme", "book"]
+    )
+    assert code == 0
+    (css,) = read_apkg(out / "звери.apkg").css.values()
+    assert "Charter" in css, "book theme is the serif one"
 
 
 def test_missing_file_is_a_clean_error(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

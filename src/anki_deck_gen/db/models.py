@@ -8,6 +8,7 @@
 from sqlalchemy import BigInteger, String
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
+from anki_deck_gen.domain import Theme
 from anki_deck_gen.timeutils import now_ts
 
 
@@ -63,6 +64,10 @@ class UserPref(Base):
     note_type_id: Mapped[str] = mapped_column(String, nullable=False)
     lang_q: Mapped[str] = mapped_column(String, nullable=False)
     lang_a: Mapped[str] = mapped_column(String, nullable=False)
-    # Значение domain.AudioSide, строкой — чтобы таблица читалась глазами.
+    # Значения domain.AudioSide и domain.Theme, строками — чтобы таблица читалась глазами.
     audio: Mapped[str] = mapped_column(String, nullable=False)
+    # Строки, записанные до появления оформления, получили 'card' от миграции.
+    theme: Mapped[str] = mapped_column(
+        String, nullable=False, default=Theme.CARD.value, server_default=Theme.CARD.value
+    )
     updated_at: Mapped[int] = mapped_column(BigInteger, nullable=False, default=now_ts)

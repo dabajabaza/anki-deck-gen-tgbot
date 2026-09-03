@@ -14,6 +14,7 @@ class ApkgContents:
     cards: int
     decks: dict[str, int]  # имя колоды → карточек в ней (без Default)
     models: list[str]
+    css: dict[str, str]  # имя типа записи → его CSS
     media: list[str]
     fields: list[list[str]]  # поля каждой записи, разбитые по \x1f
 
@@ -39,6 +40,7 @@ def read_apkg(path: Path) -> ApkgContents:
         }
         models_json = json.loads(connection.execute("SELECT models FROM col").fetchone()[0])
         models = [model["name"] for model in models_json.values()]
+        css = {model["name"]: model["css"] for model in models_json.values()}
         fields = [
             row[0].split("\x1f") for row in connection.execute("SELECT flds FROM notes").fetchall()
         ]
@@ -46,5 +48,11 @@ def read_apkg(path: Path) -> ApkgContents:
         connection.close()
         database.unlink(missing_ok=True)
     return ApkgContents(
-        notes=notes, cards=cards, decks=decks, models=models, media=media, fields=fields
+        notes=notes,
+        cards=cards,
+        decks=decks,
+        models=models,
+        css=css,
+        media=media,
+        fields=fields,
     )

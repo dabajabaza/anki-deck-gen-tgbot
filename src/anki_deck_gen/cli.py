@@ -24,6 +24,7 @@ from anki_deck_gen.domain import (
     ProblemRow,
     Summary,
     Table,
+    Theme,
 )
 from anki_deck_gen.errors import (
     AnkiDeckGenError,
@@ -73,6 +74,7 @@ def main(argv: list[str] | None = None) -> int:
                 lang_q=lang_q,
                 lang_a=lang_a,
                 audio=AudioSide(args.audio_for),
+                theme=Theme(args.theme),
             ),
             deck_name=deck_name,
             media_dir=Path(args.media_dir) if args.media_dir else None,
@@ -161,6 +163,12 @@ def _parser(settings: BuildSettings) -> argparse.ArgumentParser:
         default=AudioSide.NONE.value,
         choices=[side.value for side in AudioSide],
         help="что озвучить: none, q (вопрос), a (ответ), both",
+    )
+    parser.add_argument(
+        "--theme",
+        default=Theme.CARD.value,
+        choices=[theme.value for theme in Theme],
+        help="оформление карточек: card — «Карточка», book — «Учебник»",
     )
     parser.add_argument("--deck-name", default=None, help="имя колоды; по умолчанию — имя файла")
     parser.add_argument("--output-dir", default="out", help="куда положить .apkg")

@@ -8,7 +8,15 @@ import pytest
 from anki_deck_gen.build.audio import AudioCache
 from anki_deck_gen.build.package import build_package, deck_id_for, deck_name_for
 from anki_deck_gen.build.slug import slug
-from anki_deck_gen.domain import AudioSide, BuildRequest, DeckSettings, Fix, Sheet, Table
+from anki_deck_gen.domain import (
+    AudioSide,
+    BuildRequest,
+    DeckSettings,
+    Fix,
+    Sheet,
+    Table,
+    Theme,
+)
 from anki_deck_gen.errors import BuildAbandoned, MissingColumns, TableUnreadable
 from anki_deck_gen.notetypes.base import ANKI_NAME_SUFFIX
 from tests.helpers.apkg import read_apkg
@@ -304,3 +312,23 @@ def test_abandon_right_before_writing_leaves_no_package(tmp_path: Path) -> None:
             on_progress=flip,
         )
     assert list(out.glob("*.apkg")) == []
+
+
+@pytest.mark.parametrize(
+    ("theme", "marker"),
+    [(Theme.CARD, "min(26em"), (Theme.BOOK, "Charter")],
+    ids=["card", "book"],
+)
+def test_the_chosen_theme_becomes_the_note_type_css(
+    tmp_path: Path, theme: Theme, marker: str
+) -> None:
+    request = BuildRequest(
+        table=make_table(make_row(2, "a", "б")),
+        settings=DeckSettings(
+            note_type_id="basic", lang_q="en", lang_a="ru", audio=AudioSide.NONE, theme=theme
+        ),
+        deck_name="Тема",
+    )
+    result = build_package(request, out_dir=tmp_path / "out", media_cache_dir=tmp_path / "media")
+    (css,) = read_apkg(result.path).css.values()
+    assert marker in css and ".card.nightMode" in css

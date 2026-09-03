@@ -3,7 +3,7 @@
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 from anki_deck_gen.bot import callbacks, texts
-from anki_deck_gen.domain import AudioSide, DeckSettings
+from anki_deck_gen.domain import AudioSide, DeckSettings, Theme
 from anki_deck_gen.notetypes.base import NoteType
 
 
@@ -98,6 +98,28 @@ def audio_sides(note_type_id: str, lang_q: str, lang_a: str) -> InlineKeyboardMa
         [
             InlineKeyboardButton(
                 text=texts.BTN_BACK, callback_data=callbacks.configure(note_type_id)
+            )
+        ],
+    )
+
+
+def themes(note_type_id: str, lang_q: str, lang_a: str, audio: AudioSide) -> InlineKeyboardMarkup:
+    """Последний шаг: Оформление. Кнопка несёт полный набор Настроек."""
+
+    def option(theme: Theme) -> InlineKeyboardButton:
+        value = DeckSettings(
+            note_type_id=note_type_id, lang_q=lang_q, lang_a=lang_a, audio=audio, theme=theme
+        )
+        return InlineKeyboardButton(
+            text=texts.theme_button(theme), callback_data=callbacks.build(value)
+        )
+
+    return _rows(
+        *([option(theme)] for theme in Theme),
+        [
+            InlineKeyboardButton(
+                text=texts.BTN_BACK,
+                callback_data=callbacks.language_pair(note_type_id, lang_q, lang_a),
             )
         ],
     )

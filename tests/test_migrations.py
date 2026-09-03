@@ -24,6 +24,24 @@ def test_migrations_create_the_three_tables(tmp_path: Path) -> None:
     assert _tables(db) == EXPECTED_TABLES
 
 
+def test_user_prefs_gets_the_theme_column_with_a_default_for_old_rows(tmp_path: Path) -> None:
+    """Вторая ревизия: колонка theme; строки, записанные до неё, читаются как 'card'."""
+    db = tmp_path / "prefs.db"
+    apply_migrations(f"sqlite:///{db}")
+    con = sqlite3.connect(db)
+    try:
+        columns = {row[1] for row in con.execute("PRAGMA table_info(user_prefs)")}
+        assert "theme" in columns
+        con.execute(
+            "INSERT INTO user_prefs (user_id, note_type_id, lang_q, lang_a, audio, updated_at) "
+            "VALUES (1, 'basic', 'en', 'ru', 'none', 0)"
+        )
+        (theme,) = con.execute("SELECT theme FROM user_prefs WHERE user_id = 1").fetchone()
+    finally:
+        con.close()
+    assert theme == "card"
+
+
 def test_migrations_are_idempotent(tmp_path: Path) -> None:
     db = tmp_path / "twice.db"
     apply_migrations(f"sqlite:///{db}")

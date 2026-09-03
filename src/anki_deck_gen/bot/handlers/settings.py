@@ -1,8 +1,10 @@
 """Выбор Настроек колоды кнопками и постановка Задания в очередь.
 
-Состояния нет: тип записи, пара языков и сторона озвучки едут в callback_data
-(bot/callbacks.py), а Таблица лежит в Pending. Последний шаг собирает
-BuildRequest целиком из Pending и отдаёт воркеру — тот в Pending не смотрит.
+Состояния нет: тип записи, пара языков, сторона озвучки и оформление едут в
+callback_data (bot/callbacks.py), а Таблица лежит в Pending. Последний шаг
+собирает BuildRequest целиком из Pending и отдаёт воркеру — тот в Pending не
+смотрит. Шаги: nt → (last | cfg → lp) → s → t; тип со своим CSS (themed=False)
+шаг оформления пропускает.
 """
 
 import asyncio
@@ -29,7 +31,7 @@ logger = logging.getLogger(__name__)
 router = Router(name="settings")
 
 
-@router.callback_query(F.data.startswith(("nt:", "last:", "cfg:", "lp:", "s:")))
+@router.callback_query(F.data.startswith(("nt:", "last:", "cfg:", "lp:", "s:", "t:")))
 async def on_settings_step(
     callback: CallbackQuery,
     bot: Bot,
@@ -110,7 +112,20 @@ async def on_settings_step(
             )
             return
         chosen = replace(last, note_type_id=note_type.id)
+    elif parsed.action == "s" and note_type.themed:
+        assert parsed.lang_q and parsed.lang_a and parsed.audio
+        await edit_status(
+            bot,
+            item,
+            texts.CHOOSE_THEME.format(
+                label=note_type.label,
+                description=texts.audio_description(parsed.deck_settings()),
+            ),
+            keyboards.themes(note_type.id, parsed.lang_q, parsed.lang_a, parsed.audio),
+        )
+        return
     else:
+        # «t» — полный выбор; «s» у типа без оформления — тема по умолчанию.
         chosen = parsed.deck_settings()
 
     await enqueue(
@@ -178,13 +193,14 @@ async def enqueue(
         await reporter.finish(texts.QUEUE_FULL.format(limit=settings.queue_limit))
         return
     logger.info(
-        "queued deck for %s at position %s: type=%s langs=%s-%s audio=%s notes=%s",
+        "queued deck for %s at position %s: type=%s langs=%s-%s audio=%s theme=%s notes=%s",
         user_id,
         position,
         chosen.note_type_id,
         chosen.lang_q,
         chosen.lang_a,
         chosen.audio.value,
+        chosen.theme.value,
         item.notes,
     )
     await reporter.set(

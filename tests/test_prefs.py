@@ -2,7 +2,8 @@
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from anki_deck_gen.domain import AudioSide, DeckSettings
+from anki_deck_gen.db.models import UserPref
+from anki_deck_gen.domain import AudioSide, DeckSettings, Theme
 from anki_deck_gen.services import prefs
 
 USER = 42
@@ -14,7 +15,11 @@ async def test_unknown_user_has_no_prefs(session: AsyncSession) -> None:
 
 async def test_saved_settings_round_trip(session: AsyncSession) -> None:
     settings = DeckSettings(
-        note_type_id="basic-reversed", lang_q="en", lang_a="ru", audio=AudioSide.QUESTION
+        note_type_id="basic-reversed",
+        lang_q="en",
+        lang_a="ru",
+        audio=AudioSide.QUESTION,
+        theme=Theme.BOOK,
     )
     await prefs.save_last(session, USER, settings)
     await session.commit()
@@ -38,3 +43,19 @@ async def test_prefs_are_per_user(session: AsyncSession) -> None:
     await session.commit()
 
     assert await prefs.get_last(session, USER + 1) is None
+
+
+async def test_a_retired_theme_falls_back_to_card(session: AsyncSession) -> None:
+    """Тема, снятая из репертуара, не должна ронять «Как в прошлый раз»."""
+    await prefs.save_last(
+        session,
+        USER,
+        DeckSettings(note_type_id="basic", lang_q="en", lang_a="ru", audio=AudioSide.NONE),
+    )
+    row = await session.get(UserPref, USER)
+    assert row is not None
+    row.theme = "neon"
+    await session.commit()
+
+    last = await prefs.get_last(session, USER)
+    assert last is not None and last.theme is Theme.CARD

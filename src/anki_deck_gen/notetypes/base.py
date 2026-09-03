@@ -10,7 +10,7 @@
 from abc import ABC, abstractmethod
 from typing import ClassVar
 
-from anki_deck_gen.domain import COL_A, COL_Q, Row
+from anki_deck_gen.domain import COL_A, COL_Q, Row, Theme
 
 # Суффикс к имени типа внутри Anki. Без него пакет с типом «Простая», но с
 # другим id, при импорте породил бы у пользователя дубль «Простая-a1b2c3»
@@ -29,6 +29,9 @@ class NoteType(ABC):
     required_columns: ClassVar[frozenset[str]] = frozenset({COL_Q, COL_A})
     optional_columns: ClassVar[frozenset[str]] = frozenset()
     visible_in_bot: ClassVar[bool] = True
+    # Оформление (notetypes/theme.py) применяется к стоковым типам. Кастомный тип со
+    # своим CSS ставит False — и бот не задаёт ему вопрос об оформлении.
+    themed: ClassVar[bool] = True
 
     @abstractmethod
     def fields(self) -> list[str]:
@@ -39,8 +42,8 @@ class NoteType(ABC):
         """Шаблоны карточек в форме genanki: {"name", "qfmt", "afmt"}."""
 
     @abstractmethod
-    def css(self) -> str:
-        """Таблица стилей типа."""
+    def css(self, theme: Theme) -> str:
+        """Таблица стилей типа для выбранного Оформления."""
 
     @abstractmethod
     def note_fields(self, row: Row, *, audio_q: str, audio_a: str) -> list[str]:
