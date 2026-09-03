@@ -26,10 +26,11 @@ from aiogram.exceptions import (
     TelegramRetryAfter,
     TelegramServerError,
 )
-from aiogram.types import BotCommand, BotCommandScopeChat, BotCommandScopeDefault, ErrorEvent
+from aiogram.types import ErrorEvent
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from anki_deck_gen.bot import texts
+from anki_deck_gen.bot.commands import set_all_commands
 from anki_deck_gen.bot.handlers import admin, fallback, fix, source, start
 from anki_deck_gen.bot.handlers import settings as settings_handlers
 from anki_deck_gen.bot.loader import TableLoader
@@ -199,22 +200,6 @@ async def _establish_connection(bot: Bot) -> Any:
             delay = min(delay * 2, _CONNECT_RETRY_MAX_S)
 
 
-async def _set_commands(bot: Bot, *, admin_ids: frozenset[int]) -> None:
-    """Меню команд: всем — помощь и шаблон, Админам — ещё и раздача доступа."""
-    common = [
-        BotCommand(command="help", description=texts.CMD_HELP),
-        BotCommand(command="template", description=texts.CMD_TEMPLATE),
-    ]
-    admin_only = [
-        BotCommand(command="invite", description=texts.CMD_INVITE),
-        BotCommand(command="allow", description=texts.CMD_ALLOW),
-        BotCommand(command="access", description=texts.CMD_ACCESS),
-    ]
-    await bot.set_my_commands(common, scope=BotCommandScopeDefault())
-    for admin_id in admin_ids:
-        await bot.set_my_commands(common + admin_only, scope=BotCommandScopeChat(chat_id=admin_id))
-
-
 async def _run_bot(settings: BotSettings, *, build: Builder) -> None:
     session = (
         AiohttpSession(proxy=settings.telegram_proxy, timeout=_SESSION_TIMEOUT_S)
@@ -238,7 +223,7 @@ async def _run_bot(settings: BotSettings, *, build: Builder) -> None:
     )
 
     me = await _establish_connection(bot)
-    await _set_commands(bot, admin_ids=settings.admin_ids)
+    await set_all_commands(bot, admin_ids=settings.admin_ids)
     logger.info("bot @%s started (long polling), %d admin(s)", me.username, len(settings.admin_ids))
 
     # Telegram ответил — готовность теперь честное утверждение.
