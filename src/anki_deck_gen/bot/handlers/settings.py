@@ -17,7 +17,7 @@ from anki_deck_gen import notetypes
 from anki_deck_gen.bot import callbacks, keyboards, texts
 from anki_deck_gen.bot.pending import Pending, PendingStore
 from anki_deck_gen.bot.progress import ProgressReporter
-from anki_deck_gen.bot.views import edit_status, render_summary
+from anki_deck_gen.bot.views import edit_status, is_stale, render_summary
 from anki_deck_gen.config import BotSettings
 from anki_deck_gen.domain import BuildRequest, DeckSettings
 from anki_deck_gen.errors import UnknownNoteType
@@ -49,6 +49,9 @@ async def on_settings_step(
         await callback.answer()
         if message is not None:
             await _edit(message, texts.ERR_EXPIRED.format(minutes=settings.pending_ttl_s // 60))
+        return
+    if is_stale(callback, item):
+        await callback.answer(texts.ERR_UNKNOWN_BUTTON, show_alert=True)
         return
     if item.unresolved():
         # Кнопки настроек появляются только после решения проблем; сюда можно
@@ -141,6 +144,15 @@ async def enqueue(
             texts.ERR_MISSING_COLUMNS.format(
                 label=note_type.label, columns=", ".join(sorted(missing))
             ),
+        )
+        return
+
+    if item.notes > settings.max_notes:
+        # Потолок считается по ЭФФЕКТИВНОЙ таблице: validate() на входе видит только
+        # годные строки, а исправления в диалоге добавляют записей.
+        pending.pop(user_id)
+        await edit_status(
+            bot, item, texts.ERR_TOO_MANY_ROWS.format(count=item.notes, limit=settings.max_notes)
         )
         return
 

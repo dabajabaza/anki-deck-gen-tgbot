@@ -179,3 +179,49 @@ def test_queue_counts_the_in_flight_request() -> None:
     assert queue.submit(_request(bot)) == 2
     with pytest.raises(asyncio.QueueFull):
         queue.submit(_request(bot))
+
+
+async def test_timeout_waits_for_the_thread_before_cleanup_and_next_request(tmp_path: Path) -> None:
+    """После таймаута воркер ждёт выхода потока: scratch жив, второе Задание не стартует."""
+    events: list[tuple[str, float]] = []
+    first_saw_scratch_alive = threading.Event()
+
+    def slow_build(
+        request: BuildRequest, *, out_dir: Path, abandoned: threading.Event, **kwargs: Any
+    ) -> BuildResult:
+        while not abandoned.wait(0.01):
+            pass
+        time.sleep(0.2)  # «дописываем фразу» уже после сигнала
+        if out_dir.exists():
+            first_saw_scratch_alive.set()
+        events.append(("first_end", time.monotonic()))
+        raise BuildAbandoned
+
+    result = make_result(tmp_path)
+
+    def quick_build(request: BuildRequest, **kwargs: Any) -> BuildResult:
+        events.append(("second_start", time.monotonic()))
+        return result
+
+    calls = iter([slow_build, quick_build])
+
+    def build(request: BuildRequest, **kwargs: Any) -> BuildResult:
+        return next(calls)(request, **kwargs)
+
+    session = RecordingSession()
+    bot = Bot(token=FAKE_BOT_TOKEN, session=session)
+    queue = RequestQueue(5)
+    worker = RequestWorker(
+        queue=queue, bot=bot, settings=build_settings(tmp_path, job_timeout_s=1), build=build
+    )
+    queue.submit(_request(bot))
+    queue.submit(_request(bot))
+    await _drain(worker, queue)
+
+    names = [name for name, _ in events]
+    assert names == ["first_end", "second_start"], names
+    assert first_saw_scratch_alive.is_set(), "scratch was removed underneath the running thread"
+    assert "Не успел" in session.edit_texts()[-3] or any(
+        "Не успел" in t for t in session.edit_texts()
+    )
+    assert len(session.calls_of(SendDocument)) == 1

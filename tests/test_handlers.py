@@ -411,3 +411,44 @@ async def test_summary_mentions_duplicates_and_empty_sheets(harness: BotHarness)
     text = harness.session.last_edit_text()
     assert texts.SUMMARY_DUPLICATES.format(count=1) in text
     assert "«Пусто»" in text
+
+
+async def test_a_button_from_an_older_status_message_is_refused(harness: BotHarness) -> None:
+    """Старая клавиатура не должна управлять новой Таблицей (A3)."""
+    harness.loader.tables["old.xlsx"] = make_table(("a", "б"), title="old")
+    harness.loader.tables["new.xlsx"] = make_table(("c", "д"), ("e", "ё"), title="new")
+    await harness.send_document("old.xlsx", user_id=ADMIN_ID)
+    old_item = harness.pending.get(ADMIN_ID)
+    assert old_item is not None
+    old_status = old_item.status_message_id
+    await harness.send_document("new.xlsx", user_id=ADMIN_ID)
+    harness.session.clear()
+
+    await harness.press(NO_AUDIO, user_id=ADMIN_ID, message_id=old_status)
+    answers = harness.session.answered_callbacks()
+    assert answers and answers[-1].text == texts.ERR_UNKNOWN_BUTTON
+    assert harness.queue.load == 0, "the stale button must not enqueue anything"
+    assert harness.pending.get(ADMIN_ID) is not None, "the new table stays pending"
+
+    await harness.press(callbacks.PROBLEMS_CANCEL, user_id=ADMIN_ID, message_id=old_status)
+    assert harness.pending.get(ADMIN_ID) is not None, "a stale cancel must not drop the new table"
+
+
+async def test_max_notes_counts_fixed_rows_too(harness: BotHarness) -> None:
+    """Правки в диалоге не обходят потолок MAX_NOTES."""
+    from anki_deck_gen.domain import Table as _Table
+
+    rows = [make_row(2, "ok", "да"), make_row(3, "one", ""), make_row(4, "two", "")]
+    table = _Table(sheets=(make_sheet(None, rows),), title="Лимит")
+    harness.loader.tables["limit.xlsx"] = table
+    harness.dp["settings"] = harness.dp["settings"].model_copy(update={"max_notes": 2})
+    await harness.send_document("limit.xlsx", user_id=ADMIN_ID)
+    await harness.press(callbacks.PROBLEMS_FIX, user_id=ADMIN_ID)
+    await harness.send("раз", user_id=ADMIN_ID)
+    await harness.send("два", user_id=ADMIN_ID)
+    item = harness.pending.get(ADMIN_ID)
+    assert item is not None and item.notes == 3
+    await harness.press(NO_AUDIO, user_id=ADMIN_ID)
+    assert harness.queue.load == 0
+    assert harness.session.last_edit_text() == texts.ERR_TOO_MANY_ROWS.format(count=3, limit=2)
+    assert harness.pending.get(ADMIN_ID) is None

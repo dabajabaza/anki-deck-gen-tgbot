@@ -17,7 +17,7 @@ from aiogram.types import CallbackQuery, Message
 from anki_deck_gen.bot import callbacks, texts
 from anki_deck_gen.bot.pending import Pending, PendingStore
 from anki_deck_gen.bot.states import FixRows, Rename
-from anki_deck_gen.bot.views import edit_status, render_summary
+from anki_deck_gen.bot.views import edit_status, is_stale, render_summary
 from anki_deck_gen.config import BotSettings
 from anki_deck_gen.domain import Fix, Problem, ProblemRow
 
@@ -31,6 +31,20 @@ _SEPARATOR = re.compile(r"\s+[—–-]\s+|\t")
 
 def _message_of(callback: CallbackQuery) -> Message | None:
     return callback.message if isinstance(callback.message, Message) else None
+
+
+async def _current(
+    callback: CallbackQuery, pending: PendingStore, settings: BotSettings
+) -> Pending | None:
+    """Pending этого человека — если кнопка с его ТЕКУЩЕГО статус-сообщения."""
+    item = pending.touch(callback.from_user.id)
+    if item is None:
+        await _expired(callback, settings)
+        return None
+    if is_stale(callback, item):
+        await callback.answer(texts.ERR_UNKNOWN_BUTTON, show_alert=True)
+        return None
+    return item
 
 
 async def _expired(callback: CallbackQuery, settings: BotSettings) -> None:
@@ -51,9 +65,8 @@ async def start_fixing(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = pending.touch(callback.from_user.id)
+    item = await _current(callback, pending, settings)
     if item is None:
-        await _expired(callback, settings)
         return
     unresolved = item.unresolved()
     await callback.answer()
@@ -74,9 +87,8 @@ async def skip_all(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = pending.touch(callback.from_user.id)
+    item = await _current(callback, pending, settings)
     if item is None:
-        await _expired(callback, settings)
         return
     for problem in item.unresolved():
         item.skips.add(problem.row.key)
@@ -93,12 +105,12 @@ async def cancel_table(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = pending.pop(callback.from_user.id)
+    item = await _current(callback, pending, settings)
+    if item is None:
+        return
+    pending.pop(callback.from_user.id)
     await state.clear()
     await callback.answer()
-    if item is None:
-        await _expired(callback, settings)
-        return
     await edit_status(bot, item, texts.CANCELLED)
 
 
@@ -109,9 +121,8 @@ async def ask_rename(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = pending.touch(callback.from_user.id)
+    item = await _current(callback, pending, settings)
     if item is None:
-        await _expired(callback, settings)
         return
     await state.set_state(Rename.waiting)
     await callback.answer()

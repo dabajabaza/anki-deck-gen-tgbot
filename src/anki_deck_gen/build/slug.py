@@ -14,18 +14,19 @@ def sanitize(text: str, *, lower: bool = False) -> str:
 
 
 def slug(text: str) -> str:
-    """Имя для файла кэша озвучки: детерминированное, непустое, не длиннее лимита ФС.
+    """Имя файла кэша озвучки: читаемое начало плюс хэш полного текста.
 
-    Длинная фраза на кириллице легко переваливает за 255 байт имени файла —
-    тогда хвост заменяется хэшем, а начало остаётся читаемым.
+    Хэш обязателен всегда, не только для длинных фраз: `sanitize()` выбрасывает
+    пунктуацию, и «Hi» с «Hi!» или «a/b» с «ab» дали бы одно имя — вторая фраза
+    молча получила бы чужой mp3 из кэша.
     """
     base = sanitize(text.lower())
-    digest = hashlib.sha1(text.encode("utf-8")).hexdigest()
+    digest = hashlib.sha1(text.encode("utf-8")).hexdigest()[:10]
     if not base:
-        return digest[:12]
+        return digest
     if len(base.encode("utf-8")) > _MAX_SLUG_BYTES:
-        return f"{base[:60]}_{digest[:10]}"
-    return base
+        base = base[:60]
+    return f"{base}_{digest}"
 
 
 def apkg_filename(deck_name: str) -> str:
