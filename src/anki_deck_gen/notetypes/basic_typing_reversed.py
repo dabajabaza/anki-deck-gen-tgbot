@@ -24,6 +24,7 @@ from anki_deck_gen.notetypes.basic import stock_fields, stock_note_fields
 class BasicTypingReversed(NoteType):
     id = "basic-typing-reversed"
     label = "Простая (с вводом ответа в обе стороны)"
+    button = "Ввод в обе стороны"
     description = "Две карточки, в обе стороны, ответ набирается с клавиатуры."
     model_id = 1756900005
     cards_per_note = 2

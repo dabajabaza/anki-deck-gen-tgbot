@@ -13,6 +13,7 @@ from anki_deck_gen.notetypes.basic import stock_fields, stock_note_fields
 class BasicTyping(NoteType):
     id = "basic-typing"
     label = "Простая (с вводом ответа)"
+    button = "Ввод ответа"
     description = "Ответ набирается с клавиатуры, Anki подсветит ошибки."
     model_id = 1756900003
     cards_per_note = 1

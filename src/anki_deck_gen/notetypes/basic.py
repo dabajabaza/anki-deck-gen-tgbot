@@ -26,6 +26,7 @@ def stock_card_1() -> dict[str, str]:
 class Basic(NoteType):
     id = "basic"
     label = "Простая"
+    button = "Простая"
     description = "Вопрос на лице, ответ на обороте. Одна карточка на запись."
     model_id = 1756900001
     cards_per_note = 1
