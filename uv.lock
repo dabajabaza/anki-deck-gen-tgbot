@@ -209,6 +209,7 @@ dependencies = [
     { name = "aiohttp-socks" },
     { name = "aiosqlite" },
     { name = "alembic" },
+    { name = "anyascii" },
     { name = "genanki" },
     { name = "gtts" },
     { name = "openpyxl" },
@@ -233,6 +234,7 @@ requires-dist = [
     { name = "aiohttp-socks", specifier = ">=0.10.1" },
     { name = "aiosqlite", specifier = ">=0.22" },
     { name = "alembic", specifier = ">=1.19" },
+    { name = "anyascii", specifier = ">=0.3.3" },
     { name = "genanki", specifier = ">=0.13.1" },
     { name = "gtts", specifier = ">=2.5.4" },
     { name = "openpyxl", specifier = ">=3.1.5" },
@@ -257,6 +259,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/5f/56/a8120250d128bed162cd73c76d45f6ef9991f3e068f62a8ee060afa3104a/annotated_types-0.8.0.tar.gz", hash = "sha256:13b2beaad985e05e2d6407ee4c4f35590b11f8d693a258a561055cac8f64cab7", size = 15893, upload-time = "2026-07-23T20:16:13.995Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/99/91/8acff4f5e50511b911bbccb72b8628a49c68ce14148cd9f6431094859a90/annotated_types-0.8.0-py3-none-any.whl", hash = "sha256:f072f4d804ea359e4eaf198b1af7a8b0943881a87f31bb764f8bf219bb9419e0", size = 13427, upload-time = "2026-07-23T20:16:12.938Z" },
+]
+
+[[package]]
+name = "anyascii"
+version = "0.3.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/db/ba/edebda727008390936da4a9bf677c19cd63b32d51e864656d2cbd1028e25/anyascii-0.3.3.tar.gz", hash = "sha256:c94e9dd9d47b3d9494eca305fef9447d00b4bf1a32aff85aa746fa3ec7fb95c3", size = 264680, upload-time = "2025-06-29T03:33:30.427Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c2/76/783b75a21ce3563b8709050de030ae253853b147bd52e141edc1025aa268/anyascii-0.3.3-py3-none-any.whl", hash = "sha256:f5ab5e53c8781a36b5a40e1296a0eeda2f48c649ef10c3921c1381b1d00dee7a", size = 345090, upload-time = "2025-06-29T03:33:28.356Z" },
 ]
 
 [[package]]

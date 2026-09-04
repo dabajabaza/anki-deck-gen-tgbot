@@ -80,8 +80,8 @@ def test_text_source_builds_a_basic_deck(tmp_path: Path, monkeypatch: pytest.Mon
         ["--source", str(txt), "--deck-name", "Звери", "--output-dir", str(tmp_path / "o")]
     )
     assert code == 0
-    notes, cards, names = _inspect(tmp_path / "o" / "звери.apkg")
-    assert (notes, cards, names) == (2, 2, ["Звери"])
+    notes, cards, names = _inspect(tmp_path / "o" / "zveri.apkg")
+    assert (notes, cards, names) == (2, 2, ["Звери"]), "имя колоды русское, имя файла — нет"
 
 
 def test_theme_flag_picks_the_css(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
@@ -93,7 +93,7 @@ def test_theme_flag_picks_the_css(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
         ["--source", str(txt), "--deck-name", "Звери", "--output-dir", str(out), "--theme", "book"]
     )
     assert code == 0
-    (css,) = read_apkg(out / "звери.apkg").css.values()
+    (css,) = read_apkg(out / "zveri.apkg").css.values()
     assert "Charter" in css, "book theme is the serif one"
 
 

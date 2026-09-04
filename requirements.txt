@@ -22,6 +22,8 @@ alembic==1.19.1
     # via anki-deck-gen
 annotated-types==0.8.0
     # via pydantic
+anyascii==0.3.3
+    # via anki-deck-gen
 attrs==26.1.0
     # via aiohttp
 cached-property==2.0.1

@@ -17,6 +17,7 @@ class ApkgContents:
     css: dict[str, str]  # имя типа записи → его CSS
     media: list[str]
     fields: list[list[str]]  # поля каждой записи, разбитые по \x1f
+    tags: list[list[str]]  # метки каждой записи
 
 
 def read_apkg(path: Path) -> ApkgContents:
@@ -44,6 +45,7 @@ def read_apkg(path: Path) -> ApkgContents:
         fields = [
             row[0].split("\x1f") for row in connection.execute("SELECT flds FROM notes").fetchall()
         ]
+        tags = [row[0].split() for row in connection.execute("SELECT tags FROM notes").fetchall()]
     finally:
         connection.close()
         database.unlink(missing_ok=True)
@@ -55,4 +57,5 @@ def read_apkg(path: Path) -> ApkgContents:
         css=css,
         media=media,
         fields=fields,
+        tags=tags,
     )
