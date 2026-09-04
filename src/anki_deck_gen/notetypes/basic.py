@@ -1,8 +1,7 @@
 """«Простая» — стоковый Basic: вопрос на лице, ответ на обороте, одна карточка."""
 
-from anki_deck_gen.domain import Row, Theme
+from anki_deck_gen.domain import Row
 from anki_deck_gen.notetypes import stock
-from anki_deck_gen.notetypes import theme as themes
 from anki_deck_gen.notetypes.base import NoteType, register
 
 # Озвучка вопроса — сразу за вопросом на лице; озвучка ответа — за ответом на
@@ -33,9 +32,6 @@ class Basic(NoteType):
 
     def templates(self) -> list[dict[str, str]]:
         return [{"name": stock.CARD_1, "qfmt": QFMT, "afmt": AFMT}]
-
-    def css(self, theme: Theme) -> str:
-        return themes.css_for(theme)
 
     def note_fields(self, row: Row, *, audio_q: str, audio_a: str) -> list[str]:
         return stock_note_fields(row, audio_q=audio_q, audio_a=audio_a)

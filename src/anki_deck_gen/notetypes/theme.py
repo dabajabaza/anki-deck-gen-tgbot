@@ -51,6 +51,8 @@ hr#answer {
     margin: 0 0 0 0.1em;
     vertical-align: middle;
 }
+/* Размер в em: иконка идёт по строке и растёт вместе с текстом, в том числе когда
+   человек увеличил шрифт на телефоне. 24 px — пол, чтобы в мелкий шрифт не съёжилась. */
 .replay-button svg, .replay-button span svg {
     width: 1em;
     height: 1em;
@@ -138,6 +140,8 @@ hr#answer {
     margin: 0 0 0 0.1em;
     vertical-align: middle;
 }
+/* Размер в em: иконка идёт по строке и растёт вместе с текстом, в том числе когда
+   человек увеличил шрифт на телефоне. 24 px — пол, чтобы в мелкий шрифт не съёжилась. */
 .replay-button svg, .replay-button span svg {
     width: 1em;
     height: 1em;
