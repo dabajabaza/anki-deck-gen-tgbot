@@ -52,10 +52,10 @@ hr#answer {
     vertical-align: middle;
 }
 .replay-button svg, .replay-button span svg {
-    width: 0.8em;
-    height: 0.8em;
-    min-width: 20px;
-    min-height: 20px;
+    width: 1em;
+    height: 1em;
+    min-width: 24px;
+    min-height: 24px;
 }
 .replay-button svg circle { fill: none; stroke: #2b4fc4; stroke-width: 4.5; }
 .replay-button svg path { fill: #2b4fc4; }
@@ -139,10 +139,10 @@ hr#answer {
     vertical-align: middle;
 }
 .replay-button svg, .replay-button span svg {
-    width: 0.8em;
-    height: 0.8em;
-    min-width: 20px;
-    min-height: 20px;
+    width: 1em;
+    height: 1em;
+    min-width: 24px;
+    min-height: 24px;
 }
 .replay-button svg circle { fill: none; stroke: #b4432f; stroke-width: 4.5; }
 .replay-button svg path { fill: #b4432f; }

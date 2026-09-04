@@ -54,6 +54,10 @@ prefs), `bot/` (aiogram: handlers, texts, keyboards, pending, storage, middlewar
   types. Changing CSS needs no new `model_id` (Anki updates a same-schema type on import
   when mtime is newer); `themed = False` on a type skips the theme step in the bot.
   Callback data must stay ≤ 64 bytes — the longest is `t:<type>:<lq>-<la>:<audio>:<theme>`.
+- **`themes/preview.html` is generated, not hand-edited.** Change CSS in `theme.py`, then
+  `uv run python scripts/build_theme_preview.py`; `tests/test_theme_preview.py` fails if the
+  committed page is stale. The builder renders the real templates, so it also breaks when a
+  note type changes.
 - **Tests are hermetic:** `conftest.hermetic_env` chdirs away and drops env vars —
   pydantic-settings resolves `.env` against cwd.
 - **The server is FreeBSD without a Rust toolchain.** Compiled deps are pinned to ports
