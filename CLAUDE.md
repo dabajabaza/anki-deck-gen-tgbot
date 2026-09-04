@@ -50,10 +50,17 @@ prefs), `bot/` (aiogram: handlers, texts, keyboards, pending, storage, middlewar
 - **Texts are plain, Russian, in `bot/texts.py`.** No parse_mode anywhere except `HELP`
   (HTML, sent from `handlers/start.py` with link preview disabled; the example URL is
   escaped). `tests/test_texts.py` rejects `<`/`>` elsewhere and unknown placeholders.
-- **Card CSS lives in `notetypes/theme.py`** (`Theme.CARD`/`Theme.BOOK`), not in the note
+- **Card CSS lives in `notetypes/assets/css/*.css`** (`Theme.CARD`/`Theme.BOOK`), not in the note
   types. Changing CSS needs no new `model_id` (Anki updates a same-schema type on import
   when mtime is newer); `themed = False` on a type skips the theme step in the bot.
   Callback data must stay ≤ 64 bytes — the longest is `t:<type>:<lq>-<la>:<audio>:<theme>`.
+- **Card templates and CSS are files, not string literals** (`notetypes/assets/`), read
+  verbatim through `importlib.resources`. No templating engine touches them: `{{Front}}`
+  is Anki's own syntax and Jinja2 would eat it. A template file must end with exactly one
+  newline (the loader strips it); CSS keeps its own. `tests/test_assets.py` guards both,
+  and that the folder holds exactly what the registry asks for.
+- **`scripts/preview/` is the preview page's source** — Jinja2 template, CSS and JS as
+  files; Jinja2 is a dev dependency and never ships to the server.
 - **File names are ASCII, tags are not.** `build/slug.py` transliterates with `anyascii`
   for the `.apkg` and cached mp3 names (AnkiDroid refuses non-ASCII names that lost their
   encoding in transit, A16); `sanitize()` stays Unicode because it also cleans tags, which

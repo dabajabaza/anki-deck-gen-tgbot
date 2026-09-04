@@ -5,10 +5,11 @@
 осталась прежней. Этот тест — единственное, что этого не даёт.
 """
 
-import html
 import importlib.util
 from pathlib import Path
 from types import ModuleType
+
+from markupsafe import escape
 
 from anki_deck_gen.domain import Theme
 
@@ -37,12 +38,13 @@ def test_the_committed_page_is_what_the_builder_makes_now() -> None:
 def test_every_theme_has_a_column_and_its_css_on_the_page() -> None:
     """CSS попадает на страницу дважды: внутри srcdoc карточек и в раскрывающемся блоке.
 
-    Оба раза — экранированным: srcdoc живёт в атрибуте, блок CSS показывается как текст.
+    Оба раза — экранированным: srcdoc живёт в атрибуте, блок CSS показывается как
+    текст. Экранирует Jinja (`autoescape`), поэтому и в тесте её же правила.
     """
     page = PREVIEW.read_text(encoding="utf-8")
     builder = _builder()
     for value in Theme:
-        escaped = html.escape(builder.theme.css_for(value))
+        escaped = str(escape(builder.theme.css_for(value)))
         assert escaped in page, f"нет CSS темы {value.value}"
         assert f"CSS темы «{builder.texts.theme_name(value)}»" in page
     # Плюс колонка со стоковым Anki: без неё не с чем сравнивать.

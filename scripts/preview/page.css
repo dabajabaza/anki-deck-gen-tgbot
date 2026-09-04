@@ -1,0 +1,91 @@
+:root {
+  --bg: #eef0f4; --surface: #ffffff; --ink: #1b2430; --muted: #5b6b7f; --line: #d6dce5;
+  --accent: #2b4fc4; --accent-ink: #ffffff; --chip-bg: #e7eaef; --chip-ink: #4a5768;
+  --code-bg: #f6f7f9;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14171c; --surface: #1e232a; --ink: #e8ebf0; --muted: #98a3b3; --line: #2c333d;
+    --accent: #7b97f0; --accent-ink: #14171c; --chip-bg: #2a313b; --chip-ink: #b6c0cd;
+    --code-bg: #171b21;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #14171c; --surface: #1e232a; --ink: #e8ebf0; --muted: #98a3b3; --line: #2c333d;
+  --accent: #7b97f0; --accent-ink: #14171c; --chip-bg: #2a313b; --chip-ink: #b6c0cd;
+  --code-bg: #171b21;
+  color-scheme: dark;
+}
+body {
+  background: var(--bg); color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Arial,
+    sans-serif;
+  font-size: 15px; line-height: 1.5; margin: 0;
+}
+main { max-width: 1440px; margin: 0 auto; padding: 32px 24px 64px; }
+header {
+  display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  gap: 16px 32px; margin-bottom: 28px;
+}
+h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 6px;
+  text-wrap: balance; }
+.lead { color: var(--muted); margin: 0; max-width: 62ch; }
+.switch {
+  display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); border-radius: 999px;
+  padding: 8px 14px 8px 10px; font: inherit; font-weight: 500; cursor: pointer;
+}
+.switch:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.switch .knob {
+  width: 34px; height: 20px; border-radius: 999px; background: var(--line);
+  position: relative; transition: background .2s;
+}
+.switch .knob::after {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.25);
+  transition: transform .2s;
+}
+.switch[aria-pressed="true"] .knob { background: var(--accent); }
+.switch[aria-pressed="true"] .knob::after { transform: translateX(14px); }
+@media (prefers-reduced-motion: reduce) {
+  .switch .knob, .switch .knob::after { transition: none; }
+}
+.board { overflow-x: auto; padding-bottom: 8px; }
+.grid {
+  display: grid; grid-template-columns: 140px repeat(3, 320px); gap: 14px 16px;
+  align-items: stretch; min-width: max-content;
+}
+.colhead { padding: 0 4px 6px; border-bottom: 2px solid var(--line); }
+.colname { font-weight: 600; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+.colnote { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.chip {
+  font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+  border-radius: 999px; padding: 2px 8px; background: var(--chip-bg); color: var(--chip-ink);
+}
+.rowhead { display: flex; flex-direction: column; justify-content: center; padding-right: 8px; }
+.rowname { font-weight: 500; }
+.rownote { color: var(--muted); font-size: 13px; }
+.cardframe {
+  width: 320px; height: 380px; border: 1px solid var(--line); border-radius: 10px;
+  background: #fff; display: block;
+}
+section.notes {
+  margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 24px 40px;
+}
+h2 { font-size: 17px; font-weight: 600; margin: 0 0 8px; }
+section.notes ul { margin: 0; padding-left: 1.1em; }
+section.notes li { margin: 4px 0; max-width: 62ch; }
+details { margin-top: 12px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--surface); }
+summary { cursor: pointer; padding: 10px 14px; font-weight: 500; }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px;
+  border-radius: 10px; }
+pre {
+  margin: 0; padding: 12px 14px; overflow-x: auto; background: var(--code-bg);
+  border-top: 1px solid var(--line); border-radius: 0 0 10px 10px;
+  font: 12.5px/1.5 ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+}
+code { font-family: inherit; }

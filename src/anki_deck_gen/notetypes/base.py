@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 from typing import ClassVar
 
 from anki_deck_gen.domain import COL_A, COL_Q, Row, Theme
+from anki_deck_gen.notetypes import assets
 from anki_deck_gen.notetypes.theme import css_for as theme_css
 
 # Суффикс к имени типа внутри Anki. Без него пакет с типом «Простая», но с
@@ -61,6 +62,15 @@ class NoteType(ABC):
 
     def compatible_with(self, columns: frozenset[str]) -> bool:
         return self.required_columns <= columns
+
+
+def card(name: str, note_type_id: str, ordinal: int) -> dict[str, str]:
+    """Карточка в форме genanki: имя плюс две стороны из assets/templates."""
+    return {
+        "name": name,
+        "qfmt": assets.template(note_type_id, ordinal, "q"),
+        "afmt": assets.template(note_type_id, ordinal, "a"),
+    }
 
 
 REGISTRY: dict[str, NoteType] = {}

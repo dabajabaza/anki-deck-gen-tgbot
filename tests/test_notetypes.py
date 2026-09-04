@@ -78,8 +78,9 @@ def test_stock_types_take_their_css_from_the_chosen_theme() -> None:
     for note_type_id in ("basic", "basic-reversed", "basic-typing"):
         note_type = notetypes.get(note_type_id)
         assert note_type.themed
-        assert note_type.css(Theme.CARD) == theme.CARD_CSS
-        assert note_type.css(Theme.BOOK) == theme.BOOK_CSS
+        assert note_type.css(Theme.CARD) == theme.css_for(Theme.CARD)
+        assert note_type.css(Theme.BOOK) == theme.css_for(Theme.BOOK)
+        assert note_type.css(Theme.CARD) != note_type.css(Theme.BOOK)
 
 
 def test_every_theme_styles_night_mode_the_answer_rule_and_the_audio_button() -> None:
