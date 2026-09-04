@@ -1,7 +1,12 @@
 
-<title>Темы карточек anki-deck-gen</title>
+<!doctype html>
 <!-- Страница собрана scripts/build_theme_preview.py; правьте CSS в
      src/anki_deck_gen/notetypes/assets/css и пересоберите её. -->
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Темы карточек anki-deck-gen</title>
 <style>:root {
   --bg: #eef0f4; --surface: #ffffff; --ink: #1b2430; --muted: #5b6b7f; --line: #d6dce5;
   --accent: #2b4fc4; --accent-ink: #ffffff; --chip-bg: #e7eaef; --chip-ink: #4a5768;
@@ -9,14 +14,14 @@
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme=&#34;light&#34;]) {
+  :root:not([data-theme="light"]) {
     --bg: #14171c; --surface: #1e232a; --ink: #e8ebf0; --muted: #98a3b3; --line: #2c333d;
     --accent: #7b97f0; --accent-ink: #14171c; --chip-bg: #2a313b; --chip-ink: #b6c0cd;
     --code-bg: #171b21;
     color-scheme: dark;
   }
 }
-:root[data-theme=&#34;dark&#34;] {
+:root[data-theme="dark"] {
   --bg: #14171c; --surface: #1e232a; --ink: #e8ebf0; --muted: #98a3b3; --line: #2c333d;
   --accent: #7b97f0; --accent-ink: #14171c; --chip-bg: #2a313b; --chip-ink: #b6c0cd;
   --code-bg: #171b21;
@@ -24,7 +29,7 @@
 }
 body {
   background: var(--bg); color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;, Arial,
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Arial,
     sans-serif;
   font-size: 15px; line-height: 1.5; margin: 0;
 }
@@ -47,12 +52,12 @@ h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 6px
   position: relative; transition: background .2s;
 }
 .switch .knob::after {
-  content: &#34;&#34;; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+  content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
   border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.25);
   transition: transform .2s;
 }
-.switch[aria-pressed=&#34;true&#34;] .knob { background: var(--accent); }
-.switch[aria-pressed=&#34;true&#34;] .knob::after { transform: translateX(14px); }
+.switch[aria-pressed="true"] .knob { background: var(--accent); }
+.switch[aria-pressed="true"] .knob::after { transform: translateX(14px); }
 @media (prefers-reduced-motion: reduce) {
   .switch .knob, .switch .knob::after { transition: none; }
 }
@@ -90,9 +95,11 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px;
 pre {
   margin: 0; padding: 12px 14px; overflow-x: auto; background: var(--code-bg);
   border-top: 1px solid var(--line); border-radius: 0 0 10px 10px;
-  font: 12.5px/1.5 ui-monospace, &#34;JetBrains Mono&#34;, Menlo, Consolas, monospace;
+  font: 12.5px/1.5 ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
 }
 code { font-family: inherit; }</style>
+</head>
+<body>
 <main>
 <header>
   <div>
@@ -1226,21 +1233,23 @@ code#typeans {
 </section>
 </main>
 <script>(function () {
-  var button = document.getElementById(&#39;night&#39;);
+  var button = document.getElementById('night');
   var night = false;
   function paint(frame) {
     var doc = frame.contentDocument;
     if (!doc || !doc.body) return;
-    doc.body.classList.toggle(&#39;nightMode&#39;, night);
-    doc.body.classList.toggle(&#39;night_mode&#39;, night);
+    doc.body.classList.toggle('nightMode', night);
+    doc.body.classList.toggle('night_mode', night);
   }
-  var frames = Array.prototype.slice.call(document.querySelectorAll(&#39;iframe.cardframe&#39;));
+  var frames = Array.prototype.slice.call(document.querySelectorAll('iframe.cardframe'));
   frames.forEach(function (frame) {
-    frame.addEventListener(&#39;load&#39;, function () { paint(frame); });
+    frame.addEventListener('load', function () { paint(frame); });
   });
-  button.addEventListener(&#39;click&#39;, function () {
+  button.addEventListener('click', function () {
     night = !night;
-    button.setAttribute(&#39;aria-pressed&#39;, String(night));
+    button.setAttribute('aria-pressed', String(night));
     frames.forEach(paint);
   });
 })();</script>
+</body>
+</html>

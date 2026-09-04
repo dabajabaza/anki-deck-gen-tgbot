@@ -2,13 +2,29 @@
   Страница «Темы карточек». Рендерится scripts/build_theme_preview.py в
   themes/preview.html; правьте шаблон, не результат.
 
-  Экранирование включено, поэтому srcdoc и CSS в блоках подставляются как есть —
-  Jinja сама превратит кавычки и угловые скобки в сущности.
+  Экранирование включено, поэтому srcdoc карточек и CSS в раскрывающихся блоках
+  подставляются как есть — Jinja сама превратит кавычки и скобки в сущности.
+
+  А вот стиль и скрипт самой страницы идут через |safe: это наши же файлы, и внутри
+  <style>/<script> сущности не раскрываются. Без |safe кавычки в них становятся
+  &#39; и &#34;, отчего скрипт перестаёт разбираться, а селекторы вида
+  [data-theme="dark"] и шрифтовые стеки — совпадать.
+
+  Документ полный, с head и meta charset, а не фрагмент: файл открывают прямо из
+  репозитория, в том числе через локальный сервер IDE. Тот отдаёт его без charset
+  в заголовке, и Firefox без meta показывает кириллицу кракозябрами.
 #}
-<title>Темы карточек anki-deck-gen</title>
+<!doctype html>
 <!-- Страница собрана scripts/build_theme_preview.py; правьте CSS в
      src/anki_deck_gen/notetypes/assets/css и пересоберите её. -->
-<style>{{ page_css }}</style>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Темы карточек anki-deck-gen</title>
+<style>{{ page_css | safe }}</style>
+</head>
+<body>
 <main>
 <header>
   <div>
@@ -69,4 +85,6 @@
   </div>
 </section>
 </main>
-<script>{{ page_js }}</script>
+<script>{{ page_js | safe }}</script>
+</body>
+</html>
