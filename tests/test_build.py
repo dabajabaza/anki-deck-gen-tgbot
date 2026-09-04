@@ -42,6 +42,24 @@ def settings(note_type: str = "basic", audio: AudioSide = AudioSide.NONE) -> Dec
     return DeckSettings(note_type_id=note_type, lang_q="en", lang_a="ru", audio=audio)
 
 
+def test_tags_keep_their_own_alphabet_while_the_file_name_goes_ascii(tmp_path: Path) -> None:
+    """Метку человек видит в Anki — «глаголы» должна остаться собой; имя файла — нет."""
+    table = Table(
+        sheets=(
+            Sheet(
+                name=None,
+                columns=frozenset({"Q", "A"}),
+                rows=(make_row(2, "a", "б", tags=("глаголы", "урок 1")),),
+            ),
+        )
+    )
+    request = BuildRequest(table=table, settings=settings(), deck_name="Глаголы")
+    result = build_package(request, out_dir=tmp_path / "o", media_cache_dir=tmp_path / "m")
+
+    assert result.path.name == "glagoly.apkg"
+    assert read_apkg(result.path).tags == [["глаголы", "урок_1"]]
+
+
 def test_a_flat_table_becomes_one_deck_with_the_right_counts(tmp_path: Path) -> None:
     table = make_table(make_row(2, "a", "b", tags=("t1", "two words")), make_row(3, "c", "d"))
     result = build_package(

@@ -25,7 +25,12 @@ def problems() -> InlineKeyboardMarkup:
 def note_types(types: list[NoteType]) -> InlineKeyboardMarkup:
     return _rows(
         *(
-            [InlineKeyboardButton(text=nt.label, callback_data=callbacks.note_type(nt.id))]
+            [
+                InlineKeyboardButton(
+                    text=texts.note_type_button(nt.label),
+                    callback_data=callbacks.note_type(nt.id),
+                )
+            ]
             for nt in types
         ),
         [InlineKeyboardButton(text=texts.BTN_RENAME, callback_data=callbacks.RENAME)],

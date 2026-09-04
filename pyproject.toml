@@ -16,7 +16,7 @@ dependencies = [
     "aiogram>=3.30.0",
     # Импортируется напрямую (tables/sources.py скачивает экспорт Google Sheets),
     # поэтому объявлена, а не унаследована от aiogram.
-    "aiohttp>=3.14.1",  # нижняя граница — версия из портов; см. [tool.uv]
+    "aiohttp>=3.14.1", # нижняя граница — версия из портов; см. [tool.uv]
     # aiogram строит прокси-коннектор через этот пакет и импортирует его лениво:
     # без него AiohttpSession(proxy=…) падает на конструировании — на каждом старте,
     # в единственной конфигурации, которой пользуется прод (TELEGRAM_PROXY).
@@ -28,6 +28,7 @@ dependencies = [
     "sqlalchemy[asyncio]>=2.0",
     "aiosqlite>=0.22",
     "alembic>=1.19",
+    "anyascii>=0.3.3",
 ]
 
 [project.scripts]
