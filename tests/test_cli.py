@@ -75,7 +75,7 @@ def test_problem_rows_stop_the_cli_with_line_numbers(
 def test_text_source_builds_a_basic_deck(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MEDIA_CACHE_DIR", str(tmp_path / "media"))
     txt = tmp_path / "pairs.txt"
-    txt.write_text("cat — кот\ndog — пёс\n", encoding="utf-8")
+    txt.write_text("cat / кот\ndog / пёс\n", encoding="utf-8")
     code = cli.main(
         ["--source", str(txt), "--deck-name", "Звери", "--output-dir", str(tmp_path / "o")]
     )
@@ -87,7 +87,7 @@ def test_text_source_builds_a_basic_deck(tmp_path: Path, monkeypatch: pytest.Mon
 def test_theme_flag_picks_the_css(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("MEDIA_CACHE_DIR", str(tmp_path / "media"))
     txt = tmp_path / "pairs.txt"
-    txt.write_text("cat — кот\ndog — пёс\n", encoding="utf-8")
+    txt.write_text("cat / кот\ndog / пёс\n", encoding="utf-8")
     out = tmp_path / "o"
     code = cli.main(
         ["--source", str(txt), "--deck-name", "Звери", "--output-dir", str(out), "--theme", "book"]

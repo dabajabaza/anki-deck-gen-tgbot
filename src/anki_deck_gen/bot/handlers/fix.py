@@ -7,7 +7,6 @@ Pending, поэтому в FSM нет ни индекса, ни копии сп�
 """
 
 import logging
-import re
 
 from aiogram import Bot, F, Router
 from aiogram.filters import Command
@@ -20,13 +19,11 @@ from anki_deck_gen.bot.states import FixRows, Rename
 from anki_deck_gen.bot.views import edit_status, is_stale, render_summary
 from anki_deck_gen.config import BotSettings
 from anki_deck_gen.domain import Fix, Problem, ProblemRow
+from anki_deck_gen.tables.parse import TEXT_SEPARATOR
 
 logger = logging.getLogger(__name__)
 
 router = Router(name="fix")
-
-# Тот же разделитель, что у вставленного текста (tables/parse.py).
-_SEPARATOR = re.compile(r"\s+[—–-]\s+|\t")
 
 
 def _message_of(callback: CallbackQuery) -> Message | None:
@@ -233,7 +230,7 @@ def _fix_from(problem: ProblemRow, text: str) -> Fix | None:
         return Fix(question=row.question, answer=text)
     if problem.problem is Problem.EMPTY_QUESTION:
         return Fix(question=text, answer=row.answer)
-    parts = _SEPARATOR.split(text, maxsplit=1)
+    parts = TEXT_SEPARATOR.split(text, maxsplit=1)
     if len(parts) != 2 or not parts[0].strip() or not parts[1].strip():
         return None
     return Fix(question=parts[0].strip(), answer=parts[1].strip())

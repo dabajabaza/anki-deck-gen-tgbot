@@ -33,11 +33,19 @@ class IsTableSource(Filter):
 
     Словарь из фильтра сливается в аргументы обработчика: распознавание
     происходит один раз здесь, а не второй раз внутри.
+
+    Пока идёт диалог (правка строки, имя колоды), присланный текст — ответ на
+    вопрос бота, а не новая Таблица: «bird / птица» подходит под оба описания
+    сразу. Файл и ссылка не двусмысленны и диалог по-прежнему сбрасывают.
     """
 
-    async def __call__(self, message: Message) -> bool | dict[str, Any]:
+    async def __call__(self, message: Message, state: FSMContext) -> bool | dict[str, Any]:
         source = describe(message)
-        return {"source": source} if source is not None else False
+        if source is None:
+            return False
+        if source.kind == "text" and await state.get_state() is not None:
+            return False
+        return {"source": source}
 
 
 @router.message(IsTableSource())

@@ -21,7 +21,7 @@ def test_empty_question_and_answer_are_problems() -> None:
 
 
 def test_no_separator_marker_wins_over_empty_answer() -> None:
-    table = parse_text("a — b\nno separator")
+    table = parse_text("a / b\nno separator")
     result = validate(table, max_notes=100)
     assert result.problems[0].problem is Problem.NO_SEPARATOR
 
@@ -49,7 +49,7 @@ def test_too_many_rows_is_raised_against_the_note_count() -> None:
 
 
 def test_apply_replaces_fixed_rows_and_drops_skipped_ones() -> None:
-    table = parse_text("a — b\nbroken line\nc — \n\nd — e")
+    table = parse_text("a / b\nbroken line\nc / \n\nd / e")
     broken, empty = (row.key for row in table.rows[1:3])
     fixed = apply(
         table,

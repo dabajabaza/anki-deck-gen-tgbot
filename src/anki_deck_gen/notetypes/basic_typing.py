@@ -6,8 +6,9 @@ from anki_deck_gen.notetypes.base import NoteType, register
 from anki_deck_gen.notetypes.basic import stock_fields, stock_note_fields
 
 # На лице озвучки ответа нет: она выдала бы ответ до того, как его набрали.
+# На обороте — {{Front}} с озвучкой вопроса, а не {{FrontSide}}: см. stock.py.
 TYPE_QFMT = "{{Front}}{{Audio Front}}\n\n{{type:Back}}"
-TYPE_AFMT = "{{FrontSide}}\n\n<hr id=answer>\n\n{{type:Back}}{{Audio Back}}"
+TYPE_AFMT = "{{Front}}{{Audio Front}}\n\n<hr id=answer>\n\n{{type:Back}}{{Audio Back}}"
 
 
 @register
