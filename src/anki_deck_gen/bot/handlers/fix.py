@@ -16,7 +16,7 @@ from aiogram.types import CallbackQuery, Message
 from anki_deck_gen.bot import callbacks, texts
 from anki_deck_gen.bot.pending import Pending, PendingStore
 from anki_deck_gen.bot.states import FixRows, Rename
-from anki_deck_gen.bot.views import edit_status, is_stale, render_summary
+from anki_deck_gen.bot.views import edit_status, message_of, render_summary, resolve_pending
 from anki_deck_gen.config import BotSettings
 from anki_deck_gen.domain import Fix, Problem, ProblemRow
 from anki_deck_gen.tables.parse import TEXT_SEPARATOR
@@ -24,42 +24,6 @@ from anki_deck_gen.tables.parse import TEXT_SEPARATOR
 logger = logging.getLogger(__name__)
 
 router = Router(name="fix")
-
-
-def _message_of(callback: CallbackQuery) -> Message | None:
-    return callback.message if isinstance(callback.message, Message) else None
-
-
-async def _current(
-    callback: CallbackQuery, pending: PendingStore, settings: BotSettings, state: FSMContext
-) -> Pending | None:
-    """Pending этого человека — если кнопка с его ТЕКУЩЕГО статус-сообщения.
-
-    Порядок важен: сначала смотрим без побочных эффектов (`get`), продлеваем TTL
-    только принятому нажатию — отклонённая кнопка мёртвой клавиатуры не шаг диалога.
-    Истёкший Pending заодно закрывает диалог: иначе человек оставался бы в
-    FixRows и получал «устарела» ещё и на следующий текст.
-    """
-    item = pending.get(callback.from_user.id)
-    if item is None:
-        await state.clear()
-        await _expired(callback, settings)
-        return None
-    if is_stale(callback, item):
-        await callback.answer(texts.ERR_UNKNOWN_BUTTON, show_alert=True)
-        return None
-    pending.touch(callback.from_user.id)
-    return item
-
-
-async def _expired(callback: CallbackQuery, settings: BotSettings) -> None:
-    message = _message_of(callback)
-    if message is not None:
-        try:
-            await message.edit_text(texts.ERR_EXPIRED.format(minutes=settings.pending_ttl_s // 60))
-        except Exception as exc:  # правка косметическая
-            logger.debug("could not mark expired: %s", exc)
-    await callback.answer()
 
 
 @router.callback_query(F.data == callbacks.PROBLEMS_FIX)
@@ -70,7 +34,7 @@ async def start_fixing(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = await _current(callback, pending, settings, state)
+    item = await resolve_pending(callback, pending, settings, state)
     if item is None:
         return
     unresolved = item.unresolved()
@@ -79,7 +43,7 @@ async def start_fixing(
         await render_summary(bot, item)
         return
     await state.set_state(FixRows.fixing)
-    message = _message_of(callback)
+    message = message_of(callback)
     if message is not None:
         await message.answer(texts.fix_prompt(unresolved[0]))
 
@@ -92,7 +56,7 @@ async def skip_all(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = await _current(callback, pending, settings, state)
+    item = await resolve_pending(callback, pending, settings, state)
     if item is None:
         return
     for problem in item.unresolved():
@@ -110,7 +74,7 @@ async def cancel_table(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = await _current(callback, pending, settings, state)
+    item = await resolve_pending(callback, pending, settings, state)
     if item is None:
         return
     pending.pop(callback.from_user.id)
@@ -126,12 +90,12 @@ async def ask_rename(
     pending: PendingStore,
     settings: BotSettings,
 ) -> None:
-    item = await _current(callback, pending, settings, state)
+    item = await resolve_pending(callback, pending, settings, state)
     if item is None:
         return
     await state.set_state(Rename.waiting)
     await callback.answer()
-    message = _message_of(callback)
+    message = message_of(callback)
     if message is not None:
         await message.answer(texts.RENAME_PROMPT)
 

@@ -19,7 +19,7 @@ from aiogram import Bot
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
 from anki_deck_gen.__main__ import build_dispatcher
-from anki_deck_gen.bot.handlers import admin, fallback, fix, source, start
+from anki_deck_gen.bot.handlers import admin, draft, fallback, fix, source, start
 from anki_deck_gen.bot.handlers import settings as settings_handlers
 from anki_deck_gen.bot.pending import PendingStore
 from anki_deck_gen.config import BotSettings
@@ -37,6 +37,7 @@ _SHARED_ROUTERS = (
     admin.router,
     start.router,
     source.router,
+    draft.router,
     fix.router,
     settings_handlers.router,
     fallback.router,

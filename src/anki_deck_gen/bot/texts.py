@@ -30,7 +30,7 @@ HELP = (
     "Пришлите таблицу одним из трёх способов:\n"
     "1️⃣ файлом .xlsx или .csv;\n"
     "2️⃣ ссылкой на Google Таблицу — откройте доступ «всем, у кого есть ссылка»;\n"
-    "3️⃣ текстом — все строки одним сообщением, по строке на карточку: «вопрос / ответ».\n\n"
+    "3️⃣ текстом — строки «вопрос / ответ» по одной или сразу все, потом «Готово».\n\n"
     "<b>Заголовок</b> — первая строка таблицы: колонки Q и A (или Вопрос и Ответ).\n"
     "<b>Необязательные колонки:</b> Deck/Колода — подколода, Tags/Метки — метки через запятую.\n"
     "<b>Несколько листов</b> — каждый лист становится подколодой.\n\n"
@@ -69,6 +69,17 @@ READING = "⏳ Читаю таблицу…"
 ASK_DECK_NAME = "Как назвать колоду? Пришлите имя одним сообщением."
 RENAME_PROMPT = "Пришлите новое имя колоды одним сообщением."
 NAME_EMPTY = "Имя пустое. Пришлите ещё раз."
+
+DRAFT_TITLE = "Черновик колоды"
+DRAFT_NOTES = "Записей: {count}"
+DRAFT_PROBLEMS = "Строк без разделителя: {count} — разберём после «Готово»"
+DRAFT_HINT = (
+    "Присылайте ещё строки «вопрос / ответ» — по одной или сразу несколько.\n"
+    "Когда закончите, нажмите «Готово»."
+)
+BTN_DRAFT_DONE = "Готово"
+BTN_DRAFT_CANCEL = "Отменить"
+DRAFT_CANCELLED = "Черновик выброшен. Пришлите строки заново, когда будете готовы."
 
 SUMMARY_TITLE = "Колода «{deck}»"
 SUMMARY_SHEETS = "Листов: {count}"
@@ -315,6 +326,16 @@ def fix_prompt(problem: ProblemRow) -> str:
 
 def _short(text: str, limit: int = 80) -> str:
     return text if len(text) <= limit else text[: limit - 1] + "…"
+
+
+def draft(*, notes: int, problems: int) -> str:
+    """Экран черновика: сколько набралось и что делать дальше."""
+    lines = [DRAFT_TITLE, DRAFT_NOTES.format(count=notes)]
+    if problems:
+        lines.append(DRAFT_PROBLEMS.format(count=problems))
+    lines.append("")
+    lines.append(DRAFT_HINT)
+    return "\n".join(lines)
 
 
 def summary(

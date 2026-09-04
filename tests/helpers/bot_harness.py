@@ -111,6 +111,15 @@ class RecordingSession(BaseSession):
         assert texts, "the bot said nothing"
         return texts[-1]
 
+    def last_labels(self) -> list[str]:
+        """Подписи кнопок на последнем ОТПРАВЛЕННОМ сообщении; пусто, если их нет."""
+        sent = [method for method in self.calls if getattr(method, "text", None) is not None]
+        assert sent, "the bot said nothing"
+        markup = getattr(sent[-1], "reply_markup", None)
+        if markup is None or not hasattr(markup, "inline_keyboard"):
+            return []
+        return [button.text for row in markup.inline_keyboard for button in row]
+
     def edit_texts(self) -> list[str]:
         """Тексты всех правок статус-сообщений, по порядку."""
         return [m.text for m in self.calls_of(EditMessageText) if m.text is not None]

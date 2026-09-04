@@ -7,11 +7,12 @@
 import logging
 
 from aiogram import Bot
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, InlineKeyboardMarkup, Message
 
 from anki_deck_gen import notetypes
 from anki_deck_gen.bot import keyboards, texts
-from anki_deck_gen.bot.pending import Pending
+from anki_deck_gen.bot.pending import Pending, PendingStore
 from anki_deck_gen.config import BotSettings
 from anki_deck_gen.errors import (
     FileTooLarge,
@@ -25,6 +26,47 @@ from anki_deck_gen.errors import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+def message_of(callback: CallbackQuery) -> Message | None:
+    return callback.message if isinstance(callback.message, Message) else None
+
+
+async def resolve_pending(
+    callback: CallbackQuery, pending: PendingStore, settings: BotSettings, state: FSMContext
+) -> Pending | None:
+    """Pending этого человека — если кнопка с его ТЕКУЩЕГО статус-сообщения.
+
+    Порядок важен: сначала смотрим без побочных эффектов (`get`), продлеваем TTL
+    только принятому нажатию — отклонённая кнопка мёртвой клавиатуры не шаг диалога.
+    Истёкший Pending заодно закрывает диалог: иначе человек оставался бы в
+    FixRows и получал «устарела» ещё и на следующий текст.
+    """
+    item = pending.get(callback.from_user.id)
+    if item is None:
+        await state.clear()
+        await _mark_expired(callback, settings)
+        return None
+    if is_stale(callback, item):
+        await callback.answer(texts.ERR_UNKNOWN_BUTTON, show_alert=True)
+        return None
+    pending.touch(callback.from_user.id)
+    return item
+
+
+async def _mark_expired(callback: CallbackQuery, settings: BotSettings) -> None:
+    message = message_of(callback)
+    if message is not None:
+        try:
+            await message.edit_text(texts.ERR_EXPIRED.format(minutes=settings.pending_ttl_s // 60))
+        except Exception as exc:  # правка косметическая
+            logger.debug("could not mark expired: %s", exc)
+    await callback.answer()
+
+
+def draft_text(pending: Pending) -> str:
+    """Экран черновика: сколько строк набралось и что делать дальше."""
+    return texts.draft(notes=pending.validation.notes, problems=len(pending.validation.problems))
 
 
 def summary_text(pending: Pending) -> str:

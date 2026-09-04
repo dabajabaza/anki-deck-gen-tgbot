@@ -9,7 +9,7 @@ from pathlib import Path
 
 import anki_deck_gen
 from anki_deck_gen.__main__ import build_dispatcher
-from anki_deck_gen.bot.handlers import admin, fallback, fix, settings, source, start
+from anki_deck_gen.bot.handlers import admin, draft, fallback, fix, settings, source, start
 from anki_deck_gen.bot.loader import TableLoader
 from anki_deck_gen.bot.pending import PendingStore
 from anki_deck_gen.db.engine import create_db
@@ -90,6 +90,7 @@ def test_the_test_harness_hands_back_every_router_production_uses() -> None:
         admin.router,
         start.router,
         source.router,
+        draft.router,
         fix.router,
         settings.router,
         fallback.router,

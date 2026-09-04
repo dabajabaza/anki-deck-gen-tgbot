@@ -22,6 +22,14 @@ def problems() -> InlineKeyboardMarkup:
     )
 
 
+def draft() -> InlineKeyboardMarkup:
+    """Черновик текстом: закончить или выбросить. Висит на последнем сообщении бота."""
+    return _rows(
+        [InlineKeyboardButton(text=texts.BTN_DRAFT_DONE, callback_data=callbacks.DRAFT_DONE)],
+        [InlineKeyboardButton(text=texts.BTN_DRAFT_CANCEL, callback_data=callbacks.DRAFT_CANCEL)],
+    )
+
+
 def note_types(types: list[NoteType]) -> InlineKeyboardMarkup:
     return _rows(
         *(
