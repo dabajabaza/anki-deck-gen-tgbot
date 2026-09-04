@@ -13,16 +13,11 @@
 
 from anki_deck_gen.domain import Row
 from anki_deck_gen.notetypes import stock
-from anki_deck_gen.notetypes.base import NoteType, register
+from anki_deck_gen.notetypes.base import NoteType, card, register
 from anki_deck_gen.notetypes.basic import stock_fields, stock_note_fields
 
-# Карточка 1: вопрос → ответ. Набирается Back, озвучка ответа — только на обороте.
-FORWARD_QFMT = "{{Front}}{{Audio Front}}\n\n{{type:Back}}"
-FORWARD_AFMT = "{{Front}}{{Audio Front}}\n\n<hr id=answer>\n\n{{type:Back}}{{Audio Back}}"
-
-# Карточка 2: ответ → вопрос. Роли меняются местами, вместе с ними — озвучка.
-REVERSE_QFMT = "{{Back}}{{Audio Back}}\n\n{{type:Front}}"
-REVERSE_AFMT = "{{Back}}{{Audio Back}}\n\n<hr id=answer>\n\n{{type:Front}}{{Audio Front}}"
+# Шаблоны — assets/templates/basic-typing-reversed.card*.html: карточка 1 спрашивает
+# вопрос и набирает ответ, карточка 2 меняет роли местами вместе с озвучкой.
 
 
 @register
@@ -37,10 +32,7 @@ class BasicTypingReversed(NoteType):
         return stock_fields()
 
     def templates(self) -> list[dict[str, str]]:
-        return [
-            {"name": stock.CARD_1, "qfmt": FORWARD_QFMT, "afmt": FORWARD_AFMT},
-            {"name": stock.CARD_2, "qfmt": REVERSE_QFMT, "afmt": REVERSE_AFMT},
-        ]
+        return [card(stock.CARD_1, self.id, 1), card(stock.CARD_2, self.id, 2)]
 
     def note_fields(self, row: Row, *, audio_q: str, audio_a: str) -> list[str]:
         return stock_note_fields(row, audio_q=audio_q, audio_a=audio_a)

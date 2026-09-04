@@ -1,22 +1,22 @@
+
 <title>Темы карточек anki-deck-gen</title>
 <!-- Страница собрана scripts/build_theme_preview.py; правьте CSS в
-     src/anki_deck_gen/notetypes/theme.py и пересоберите её. -->
-<style>
-:root {
+     src/anki_deck_gen/notetypes/assets/css и пересоберите её. -->
+<style>:root {
   --bg: #eef0f4; --surface: #ffffff; --ink: #1b2430; --muted: #5b6b7f; --line: #d6dce5;
   --accent: #2b4fc4; --accent-ink: #ffffff; --chip-bg: #e7eaef; --chip-ink: #4a5768;
   --code-bg: #f6f7f9;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
+  :root:not([data-theme=&#34;light&#34;]) {
     --bg: #14171c; --surface: #1e232a; --ink: #e8ebf0; --muted: #98a3b3; --line: #2c333d;
     --accent: #7b97f0; --accent-ink: #14171c; --chip-bg: #2a313b; --chip-ink: #b6c0cd;
     --code-bg: #171b21;
     color-scheme: dark;
   }
 }
-:root[data-theme="dark"] {
+:root[data-theme=&#34;dark&#34;] {
   --bg: #14171c; --surface: #1e232a; --ink: #e8ebf0; --muted: #98a3b3; --line: #2c333d;
   --accent: #7b97f0; --accent-ink: #14171c; --chip-bg: #2a313b; --chip-ink: #b6c0cd;
   --code-bg: #171b21;
@@ -24,7 +24,7 @@
 }
 body {
   background: var(--bg); color: var(--ink);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", Arial,
+  font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;, Arial,
     sans-serif;
   font-size: 15px; line-height: 1.5; margin: 0;
 }
@@ -47,12 +47,12 @@ h1 { font-size: 28px; font-weight: 600; letter-spacing: -0.01em; margin: 0 0 6px
   position: relative; transition: background .2s;
 }
 .switch .knob::after {
-  content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
+  content: &#34;&#34;; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px;
   border-radius: 50%; background: var(--surface); box-shadow: 0 1px 2px rgba(0,0,0,.25);
   transition: transform .2s;
 }
-.switch[aria-pressed="true"] .knob { background: var(--accent); }
-.switch[aria-pressed="true"] .knob::after { transform: translateX(14px); }
+.switch[aria-pressed=&#34;true&#34;] .knob { background: var(--accent); }
+.switch[aria-pressed=&#34;true&#34;] .knob::after { transform: translateX(14px); }
 @media (prefers-reduced-motion: reduce) {
   .switch .knob, .switch .knob::after { transition: none; }
 }
@@ -90,10 +90,9 @@ summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px;
 pre {
   margin: 0; padding: 12px 14px; overflow-x: auto; background: var(--code-bg);
   border-top: 1px solid var(--line); border-radius: 0 0 10px 10px;
-  font: 12.5px/1.5 ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+  font: 12.5px/1.5 ui-monospace, &#34;JetBrains Mono&#34;, Menlo, Consolas, monospace;
 }
-code { font-family: inherit; }
-</style>
+code { font-family: inherit; }</style>
 <main>
 <header>
   <div>
@@ -105,9 +104,24 @@ code { font-family: inherit; }
     <span class="knob" aria-hidden="true"></span>Ночной режим</button>
 </header>
 <div class="board"><div class="grid">
-<div class="corner"></div><div class="colhead"><div class="colname">Стоковый Anki<span class="chip">для сравнения</span></div><div class="colnote">Arial 20, чёрное на белом. Так выглядит колода без темы.</div></div><div class="colhead"><div class="colname">Карточка</div><div class="colnote">Светлая карточка с тенью на серо-голубом фоне.</div></div><div class="colhead"><div class="colname">Учебник</div><div class="colnote">Слоновая кость, антиква, двойная линейка.</div></div>
-<div class="rowhead"><span class="rowname">Простая, лицо</span><span class="rownote">вопрос с озвучкой</span></div><iframe class="cardframe" title="Стоковый Anki: Простая, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+  <div class="corner"></div>
+  <div class="colhead">
+    <div class="colname">Стоковый Anki<span class="chip">для сравнения</span></div>
+    <div class="colnote">Arial 20, чёрное на белом. Так выглядит колода без темы.</div>
+  </div>
+  <div class="colhead">
+    <div class="colname">Карточка</div>
+    <div class="colnote">Светлая карточка с тенью на серо-голубом фоне.</div>
+  </div>
+  <div class="colhead">
+    <div class="colname">Учебник</div>
+    <div class="colnote">Слоновая кость, антиква, двойная линейка.</div>
+  </div>
+  <div class="rowhead">
+    <span class="rowname">Простая, лицо</span>
+    <span class="rownote">вопрос с озвучкой</span>
+  </div>
+  <iframe class="cardframe" title="Стоковый Anki: Простая, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -126,9 +140,8 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
     text-align: center;
     color: black;
     background-color: white;
-}
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><iframe class="cardframe" title="Карточка: Простая, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+}&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <iframe class="cardframe" title="Карточка: Простая, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -142,8 +155,8 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
 .replay-button svg path { fill: #414141; }
 /* Тема «Карточка»: белая карточка с мягкой тенью на серо-голубом фоне, синяя кнопка озвучки. */
 .card {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif;
     font-size: 24px;
     line-height: 1.4;
     text-align: center;
@@ -183,8 +196,8 @@ hr#answer {
 .replay-button svg path { fill: #2b4fc4; }
 /* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
 input#typeans {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif !important;
     font-size: 22px !important;
     line-height: 1.4;
     text-align: center;
@@ -199,8 +212,8 @@ input#typeans {
 }
 input#typeans:focus { border-color: #2b4fc4; background: #ffffff; }
 code#typeans {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif !important;
     font-size: 22px !important;
     line-height: 1.6;
 }
@@ -228,8 +241,8 @@ code#typeans {
 .nightMode .typeGood { background: #22513a; color: #d6f3de; }
 .nightMode .typeBad { background: #5e2722; color: #fadad5; }
 .nightMode .typeMissed { background: #3b3f47; color: #d8d6d0; }
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><iframe class="cardframe" title="Учебник: Простая, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <iframe class="cardframe" title="Учебник: Простая, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -243,8 +256,8 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
 .replay-button svg path { fill: #414141; }
 /* Тема «Учебник»: слоновая кость, антиква, двойная линейка, кирпичный акцент. */
 .card {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif;
     font-size: 25px;
     line-height: 1.38;
     text-align: center;
@@ -282,8 +295,8 @@ hr#answer {
 .replay-button svg path { fill: #b4432f; }
 /* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
 input#typeans {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif !important;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif !important;
     font-size: 23px !important;
     line-height: 1.4;
     text-align: center;
@@ -299,8 +312,8 @@ input#typeans {
 }
 input#typeans:focus { border-bottom-color: #b4432f; }
 code#typeans {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif !important;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif !important;
     font-size: 23px !important;
     line-height: 1.6;
 }
@@ -321,8 +334,12 @@ code#typeans {
 .nightMode .typeGood { background: #2f4d2a; color: #d9efd0; }
 .nightMode .typeBad { background: #5e2b20; color: #f7d6cc; }
 .nightMode .typeMissed { background: #3f392f; color: #ddd4c4; }
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><div class="rowhead"><span class="rowname">Простая, оборот</span><span class="rownote">ответ с озвучкой</span></div><iframe class="cardframe" title="Стоковый Anki: Простая, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <div class="rowhead">
+    <span class="rowname">Простая, оборот</span>
+    <span class="rownote">ответ с озвучкой</span>
+  </div>
+  <iframe class="cardframe" title="Стоковый Anki: Простая, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -341,13 +358,12 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
     text-align: center;
     color: black;
     background-color: white;
-}
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;
+}&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;
 
 &lt;hr id=answer&gt;
 
-Не могли бы вы описать свои симптомы?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><iframe class="cardframe" title="Карточка: Простая, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+Не могли бы вы описать свои симптомы?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <iframe class="cardframe" title="Карточка: Простая, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -361,8 +377,8 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
 .replay-button svg path { fill: #414141; }
 /* Тема «Карточка»: белая карточка с мягкой тенью на серо-голубом фоне, синяя кнопка озвучки. */
 .card {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif;
     font-size: 24px;
     line-height: 1.4;
     text-align: center;
@@ -402,8 +418,8 @@ hr#answer {
 .replay-button svg path { fill: #2b4fc4; }
 /* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
 input#typeans {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif !important;
     font-size: 22px !important;
     line-height: 1.4;
     text-align: center;
@@ -418,8 +434,8 @@ input#typeans {
 }
 input#typeans:focus { border-color: #2b4fc4; background: #ffffff; }
 code#typeans {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif !important;
     font-size: 22px !important;
     line-height: 1.6;
 }
@@ -447,12 +463,12 @@ code#typeans {
 .nightMode .typeGood { background: #22513a; color: #d6f3de; }
 .nightMode .typeBad { background: #5e2722; color: #fadad5; }
 .nightMode .typeMissed { background: #3b3f47; color: #d8d6d0; }
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;
 
 &lt;hr id=answer&gt;
 
-Не могли бы вы описать свои симптомы?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><iframe class="cardframe" title="Учебник: Простая, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+Не могли бы вы описать свои симптомы?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <iframe class="cardframe" title="Учебник: Простая, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -466,8 +482,8 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
 .replay-button svg path { fill: #414141; }
 /* Тема «Учебник»: слоновая кость, антиква, двойная линейка, кирпичный акцент. */
 .card {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif;
     font-size: 25px;
     line-height: 1.38;
     text-align: center;
@@ -505,8 +521,8 @@ hr#answer {
 .replay-button svg path { fill: #b4432f; }
 /* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
 input#typeans {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif !important;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif !important;
     font-size: 23px !important;
     line-height: 1.4;
     text-align: center;
@@ -522,8 +538,8 @@ input#typeans {
 }
 input#typeans:focus { border-bottom-color: #b4432f; }
 code#typeans {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif !important;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif !important;
     font-size: 23px !important;
     line-height: 1.6;
 }
@@ -544,12 +560,16 @@ code#typeans {
 .nightMode .typeGood { background: #2f4d2a; color: #d9efd0; }
 .nightMode .typeBad { background: #5e2b20; color: #f7d6cc; }
 .nightMode .typeMissed { background: #3f392f; color: #ddd4c4; }
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;
 
 &lt;hr id=answer&gt;
 
-Не могли бы вы описать свои симптомы?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><div class="rowhead"><span class="rowname">С вводом ответа, лицо</span><span class="rownote">поле, куда набирают ответ</span></div><iframe class="cardframe" title="Стоковый Anki: С вводом ответа, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+Не могли бы вы описать свои симптомы?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <div class="rowhead">
+    <span class="rowname">С вводом ответа, лицо</span>
+    <span class="rownote">поле, куда набирают ответ</span>
+  </div>
+  <iframe class="cardframe" title="Стоковый Anki: С вводом ответа, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -568,13 +588,12 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
     text-align: center;
     color: black;
     background-color: white;
-}
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;
+}&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;
 
 &lt;center&gt;
-&lt;input type=text id=typeans style=&quot;font-family: &#x27;Arial&#x27;; font-size: 20px;&quot;&gt;
-&lt;/center&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><iframe class="cardframe" title="Карточка: С вводом ответа, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+&lt;input type=text id=typeans style=&#34;font-family: &#39;Arial&#39;; font-size: 20px;&#34;&gt;
+&lt;/center&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <iframe class="cardframe" title="Карточка: С вводом ответа, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -588,8 +607,8 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
 .replay-button svg path { fill: #414141; }
 /* Тема «Карточка»: белая карточка с мягкой тенью на серо-голубом фоне, синяя кнопка озвучки. */
 .card {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif;
     font-size: 24px;
     line-height: 1.4;
     text-align: center;
@@ -629,8 +648,8 @@ hr#answer {
 .replay-button svg path { fill: #2b4fc4; }
 /* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
 input#typeans {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif !important;
     font-size: 22px !important;
     line-height: 1.4;
     text-align: center;
@@ -645,8 +664,8 @@ input#typeans {
 }
 input#typeans:focus { border-color: #2b4fc4; background: #ffffff; }
 code#typeans {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif !important;
     font-size: 22px !important;
     line-height: 1.6;
 }
@@ -674,12 +693,12 @@ code#typeans {
 .nightMode .typeGood { background: #22513a; color: #d6f3de; }
 .nightMode .typeBad { background: #5e2722; color: #fadad5; }
 .nightMode .typeMissed { background: #3b3f47; color: #d8d6d0; }
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;
 
 &lt;center&gt;
-&lt;input type=text id=typeans style=&quot;font-family: &#x27;Arial&#x27;; font-size: 20px;&quot;&gt;
-&lt;/center&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><iframe class="cardframe" title="Учебник: С вводом ответа, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+&lt;input type=text id=typeans style=&#34;font-family: &#39;Arial&#39;; font-size: 20px;&#34;&gt;
+&lt;/center&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <iframe class="cardframe" title="Учебник: С вводом ответа, лицо" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -693,8 +712,8 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
 .replay-button svg path { fill: #414141; }
 /* Тема «Учебник»: слоновая кость, антиква, двойная линейка, кирпичный акцент. */
 .card {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif;
     font-size: 25px;
     line-height: 1.38;
     text-align: center;
@@ -732,8 +751,8 @@ hr#answer {
 .replay-button svg path { fill: #b4432f; }
 /* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
 input#typeans {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif !important;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif !important;
     font-size: 23px !important;
     line-height: 1.4;
     text-align: center;
@@ -749,8 +768,8 @@ input#typeans {
 }
 input#typeans:focus { border-bottom-color: #b4432f; }
 code#typeans {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif !important;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif !important;
     font-size: 23px !important;
     line-height: 1.6;
 }
@@ -771,12 +790,16 @@ code#typeans {
 .nightMode .typeGood { background: #2f4d2a; color: #d9efd0; }
 .nightMode .typeBad { background: #5e2b20; color: #f7d6cc; }
 .nightMode .typeMissed { background: #3f392f; color: #ddd4c4; }
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;
 
 &lt;center&gt;
-&lt;input type=text id=typeans style=&quot;font-family: &#x27;Arial&#x27;; font-size: 20px;&quot;&gt;
-&lt;/center&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><div class="rowhead"><span class="rowname">С вводом ответа, оборот</span><span class="rownote">Anki подсветил ошибку</span></div><iframe class="cardframe" title="Стоковый Anki: С вводом ответа, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+&lt;input type=text id=typeans style=&#34;font-family: &#39;Arial&#39;; font-size: 20px;&#34;&gt;
+&lt;/center&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <div class="rowhead">
+    <span class="rowname">С вводом ответа, оборот</span>
+    <span class="rownote">Anki подсветил ошибку</span>
+  </div>
+  <iframe class="cardframe" title="Стоковый Anki: С вводом ответа, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -795,13 +818,12 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
     text-align: center;
     color: black;
     background-color: white;
-}
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;
+}&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;
 
 &lt;hr id=answer&gt;
 
-&lt;div style=&quot;font-family: &#x27;Arial&#x27;; font-size: 20px&quot;&gt;&lt;code id=typeans&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeBad&gt;ваши&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;br&gt;&lt;span id=typearrow&gt;&amp;darr;&lt;/span&gt;&lt;br&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeMissed&gt;свои&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;/code&gt;&lt;/div&gt;&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><iframe class="cardframe" title="Карточка: С вводом ответа, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+&lt;div style=&#34;font-family: &#39;Arial&#39;; font-size: 20px&#34;&gt;&lt;code id=typeans&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeBad&gt;ваши&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;br&gt;&lt;span id=typearrow&gt;&amp;darr;&lt;/span&gt;&lt;br&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeMissed&gt;свои&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;/code&gt;&lt;/div&gt;&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <iframe class="cardframe" title="Карточка: С вводом ответа, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -815,8 +837,8 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
 .replay-button svg path { fill: #414141; }
 /* Тема «Карточка»: белая карточка с мягкой тенью на серо-голубом фоне, синяя кнопка озвучки. */
 .card {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif;
     font-size: 24px;
     line-height: 1.4;
     text-align: center;
@@ -856,8 +878,8 @@ hr#answer {
 .replay-button svg path { fill: #2b4fc4; }
 /* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
 input#typeans {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif !important;
     font-size: 22px !important;
     line-height: 1.4;
     text-align: center;
@@ -872,8 +894,8 @@ input#typeans {
 }
 input#typeans:focus { border-color: #2b4fc4; background: #ffffff; }
 code#typeans {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif !important;
     font-size: 22px !important;
     line-height: 1.6;
 }
@@ -901,12 +923,12 @@ code#typeans {
 .nightMode .typeGood { background: #22513a; color: #d6f3de; }
 .nightMode .typeBad { background: #5e2722; color: #fadad5; }
 .nightMode .typeMissed { background: #3b3f47; color: #d8d6d0; }
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;
 
 &lt;hr id=answer&gt;
 
-&lt;div style=&quot;font-family: &#x27;Arial&#x27;; font-size: 20px&quot;&gt;&lt;code id=typeans&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeBad&gt;ваши&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;br&gt;&lt;span id=typearrow&gt;&amp;darr;&lt;/span&gt;&lt;br&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeMissed&gt;свои&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;/code&gt;&lt;/div&gt;&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe><iframe class="cardframe" title="Учебник: С вводом ответа, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;style&gt;
-hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
+&lt;div style=&#34;font-family: &#39;Arial&#39;; font-size: 20px&#34;&gt;&lt;code id=typeans&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeBad&gt;ваши&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;br&gt;&lt;span id=typearrow&gt;&amp;darr;&lt;/span&gt;&lt;br&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeMissed&gt;свои&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;/code&gt;&lt;/div&gt;&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+  <iframe class="cardframe" title="Учебник: С вводом ответа, оборот" srcdoc="&lt;!doctype html&gt;&lt;html&gt;&lt;head&gt;&lt;meta charset=&#34;utf-8&#34;&gt;&lt;style&gt;hr { background-color: darkgray; margin: 1em 0; border: none; height: 1px; }
 body { margin: 20px; overflow-wrap: break-word; }
 body.nightMode { background-color: #2c2c2c; color: #fcfcfc; }
 #typeans { width: 100%; box-sizing: border-box; line-height: 1.75; }
@@ -920,8 +942,8 @@ code#typeans { white-space: pre-wrap; font-variant-ligatures: none; }
 .replay-button svg path { fill: #414141; }
 /* Тема «Учебник»: слоновая кость, антиква, двойная линейка, кирпичный акцент. */
 .card {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif;
     font-size: 25px;
     line-height: 1.38;
     text-align: center;
@@ -959,8 +981,8 @@ hr#answer {
 .replay-button svg path { fill: #b4432f; }
 /* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
 input#typeans {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif !important;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif !important;
     font-size: 23px !important;
     line-height: 1.4;
     text-align: center;
@@ -976,8 +998,8 @@ input#typeans {
 }
 input#typeans:focus { border-bottom-color: #b4432f; }
 code#typeans {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif !important;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif !important;
     font-size: 23px !important;
     line-height: 1.6;
 }
@@ -998,11 +1020,11 @@ code#typeans {
 .nightMode .typeGood { background: #2f4d2a; color: #d9efd0; }
 .nightMode .typeBad { background: #5e2b20; color: #f7d6cc; }
 .nightMode .typeMissed { background: #3f392f; color: #ddd4c4; }
-&lt;/style&gt;&lt;/head&gt;&lt;body class=&quot;card card1&quot;&gt;Could you describe your symptoms?&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;
+&lt;/style&gt;&lt;/head&gt;&lt;body class=&#34;card card1&#34;&gt;Could you describe your symptoms?&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;
 
 &lt;hr id=answer&gt;
 
-&lt;div style=&quot;font-family: &#x27;Arial&#x27;; font-size: 20px&quot;&gt;&lt;code id=typeans&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeBad&gt;ваши&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;br&gt;&lt;span id=typearrow&gt;&amp;darr;&lt;/span&gt;&lt;br&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeMissed&gt;свои&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;/code&gt;&lt;/div&gt;&lt;a class=&quot;replay-button&quot; href=&quot;#&quot; onclick=&quot;return false&quot;&gt;&lt;svg class=&quot;playImage&quot; viewBox=&quot;0 0 64 64&quot;&gt;&lt;circle cx=&quot;32&quot; cy=&quot;32&quot; r=&quot;29&quot;/&gt;&lt;path d=&quot;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&quot;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
+&lt;div style=&#34;font-family: &#39;Arial&#39;; font-size: 20px&#34;&gt;&lt;code id=typeans&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeBad&gt;ваши&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;br&gt;&lt;span id=typearrow&gt;&amp;darr;&lt;/span&gt;&lt;br&gt;&lt;span class=typeGood&gt;Не могли бы вы описать &lt;/span&gt;&lt;span class=typeMissed&gt;свои&lt;/span&gt;&lt;span class=typeGood&gt; симптомы?&lt;/span&gt;&lt;/code&gt;&lt;/div&gt;&lt;a class=&#34;replay-button&#34; href=&#34;#&#34; onclick=&#34;return false&#34;&gt;&lt;svg class=&#34;playImage&#34; viewBox=&#34;0 0 64 64&#34;&gt;&lt;circle cx=&#34;32&#34; cy=&#34;32&#34; r=&#34;29&#34;/&gt;&lt;path d=&#34;M56.502,32.301l-37.502,20.101l0.329,-40.804l37.173,20.703Z&#34;/&gt;&lt;/svg&gt;&lt;/a&gt;&lt;/body&gt;&lt;/html&gt;"></iframe>
 </div></div>
 <section class="notes">
   <div>
@@ -1032,8 +1054,8 @@ code#typeans {
     <h2>CSS</h2>
     <details><summary>CSS темы «Карточка»</summary><pre><code>/* Тема «Карточка»: белая карточка с мягкой тенью на серо-голубом фоне, синяя кнопка озвучки. */
 .card {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif;
     font-size: 24px;
     line-height: 1.4;
     text-align: center;
@@ -1073,8 +1095,8 @@ hr#answer {
 .replay-button svg path { fill: #2b4fc4; }
 /* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
 input#typeans {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif !important;
     font-size: 22px !important;
     line-height: 1.4;
     text-align: center;
@@ -1089,8 +1111,8 @@ input#typeans {
 }
 input#typeans:focus { border-color: #2b4fc4; background: #ffffff; }
 code#typeans {
-    font-family: -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, Roboto, &quot;Noto Sans&quot;,
-        &quot;Helvetica Neue&quot;, Arial, sans-serif !important;
+    font-family: -apple-system, BlinkMacSystemFont, &#34;Segoe UI&#34;, Roboto, &#34;Noto Sans&#34;,
+        &#34;Helvetica Neue&#34;, Arial, sans-serif !important;
     font-size: 22px !important;
     line-height: 1.6;
 }
@@ -1118,10 +1140,11 @@ code#typeans {
 .nightMode .typeGood { background: #22513a; color: #d6f3de; }
 .nightMode .typeBad { background: #5e2722; color: #fadad5; }
 .nightMode .typeMissed { background: #3b3f47; color: #d8d6d0; }
-</code></pre></details><details><summary>CSS темы «Учебник»</summary><pre><code>/* Тема «Учебник»: слоновая кость, антиква, двойная линейка, кирпичный акцент. */
+</code></pre></details>
+    <details><summary>CSS темы «Учебник»</summary><pre><code>/* Тема «Учебник»: слоновая кость, антиква, двойная линейка, кирпичный акцент. */
 .card {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif;
     font-size: 25px;
     line-height: 1.38;
     text-align: center;
@@ -1159,8 +1182,8 @@ hr#answer {
 .replay-button svg path { fill: #b4432f; }
 /* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
 input#typeans {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif !important;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif !important;
     font-size: 23px !important;
     line-height: 1.4;
     text-align: center;
@@ -1176,8 +1199,8 @@ input#typeans {
 }
 input#typeans:focus { border-bottom-color: #b4432f; }
 code#typeans {
-    font-family: Charter, &quot;Bitstream Charter&quot;, &quot;Iowan Old Style&quot;, Georgia, &quot;Noto Serif&quot;,
-        &quot;Times New Roman&quot;, serif !important;
+    font-family: Charter, &#34;Bitstream Charter&#34;, &#34;Iowan Old Style&#34;, Georgia, &#34;Noto Serif&#34;,
+        &#34;Times New Roman&#34;, serif !important;
     font-size: 23px !important;
     line-height: 1.6;
 }
@@ -1202,24 +1225,22 @@ code#typeans {
   </div>
 </section>
 </main>
-<script>
-(function () {
-  var button = document.getElementById('night');
+<script>(function () {
+  var button = document.getElementById(&#39;night&#39;);
   var night = false;
   function paint(frame) {
     var doc = frame.contentDocument;
     if (!doc || !doc.body) return;
-    doc.body.classList.toggle('nightMode', night);
-    doc.body.classList.toggle('night_mode', night);
+    doc.body.classList.toggle(&#39;nightMode&#39;, night);
+    doc.body.classList.toggle(&#39;night_mode&#39;, night);
   }
-  var frames = Array.prototype.slice.call(document.querySelectorAll('iframe.cardframe'));
+  var frames = Array.prototype.slice.call(document.querySelectorAll(&#39;iframe.cardframe&#39;));
   frames.forEach(function (frame) {
-    frame.addEventListener('load', function () { paint(frame); });
+    frame.addEventListener(&#39;load&#39;, function () { paint(frame); });
   });
-  button.addEventListener('click', function () {
+  button.addEventListener(&#39;click&#39;, function () {
     night = !night;
-    button.setAttribute('aria-pressed', String(night));
+    button.setAttribute(&#39;aria-pressed&#39;, String(night));
     frames.forEach(paint);
   });
-})();
-</script>
+})();</script>

@@ -1,0 +1,72 @@
+{#
+  Страница «Темы карточек». Рендерится scripts/build_theme_preview.py в
+  themes/preview.html; правьте шаблон, не результат.
+
+  Экранирование включено, поэтому srcdoc и CSS в блоках подставляются как есть —
+  Jinja сама превратит кавычки и угловые скобки в сущности.
+#}
+<title>Темы карточек anki-deck-gen</title>
+<!-- Страница собрана scripts/build_theme_preview.py; правьте CSS в
+     src/anki_deck_gen/notetypes/assets/css и пересоберите её. -->
+<style>{{ page_css }}</style>
+<main>
+<header>
+  <div>
+    <h1>Темы карточек anki-deck-gen</h1>
+    <p class="lead">Одна и та же запись во всех оформлениях, которые предлагает бот.
+    Переключатель показывает ночной режим Anki.</p>
+  </div>
+  <button class="switch" id="night" type="button" aria-pressed="false">
+    <span class="knob" aria-hidden="true"></span>Ночной режим</button>
+</header>
+<div class="board"><div class="grid">
+  <div class="corner"></div>
+  {%- for column in columns %}
+  <div class="colhead">
+    <div class="colname">{{ column.name }}{% if column.chip %}<span class="chip">{{ column.chip }}</span>{% endif %}</div>
+    <div class="colnote">{{ column.note }}</div>
+  </div>
+  {%- endfor %}
+  {%- for row in rows %}
+  <div class="rowhead">
+    <span class="rowname">{{ row.name }}</span>
+    <span class="rownote">{{ row.note }}</span>
+  </div>
+  {%- for cell in row.cells %}
+  <iframe class="cardframe" title="{{ cell.title }}" srcdoc="{{ cell.document }}"></iframe>
+  {%- endfor %}
+  {%- endfor %}
+</div></div>
+<section class="notes">
+  <div>
+    <h2>Общее у тем</h2>
+    <ul>
+      <li>Меняется только CSS типа записи. Поля, шаблоны и model_id прежние, поэтому
+      Anki обновит оформление и в уже импортированных колодах.</li>
+      <li>Шрифты только системные: веб-шрифт пришлось бы класть файлом в каждую колоду.</li>
+      <li>Кнопка озвучки — контурный круг в цвете темы вместо стокового залитого.</li>
+      <li>Ночной режим по классу card nightMode, который ставят Anki, AnkiDroid и
+      AnkiMobile.</li>
+      <li>Подсветка набранного ответа мягче стоковой: вместо чистых зелёного и красного.</li>
+    </ul>
+  </div>
+  <div>
+    <h2>Чем отличаются</h2>
+    <ul>
+      <li><strong>Карточка.</strong> Узнаваемый вид карточки: светлая панель с тенью.
+      Фон вокруг рисуется тенью, поэтому работает и в старых версиях Anki.</li>
+      <li><strong>Учебник.</strong> Антиква и двойная линейка, как в печатном пособии.
+      На Android засечки заменит Noto Serif.</li>
+    </ul>
+  </div>
+</section>
+<section class="notes" style="grid-template-columns: 1fr">
+  <div>
+    <h2>CSS</h2>
+    {%- for column in columns if not column.chip %}
+    <details><summary>CSS темы «{{ column.name }}»</summary><pre><code>{{ column.css }}</code></pre></details>
+    {%- endfor %}
+  </div>
+</section>
+</main>
+<script>{{ page_js }}</script>

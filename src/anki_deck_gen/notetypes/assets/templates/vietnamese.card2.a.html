@@ -1,0 +1,35 @@
+{{Back}}
+
+<hr id=answer>
+
+<div class=back>
+    {{type:Front}}
+</div>
+
+{{#Dialect}}
+  <hr>
+	<div class=field_container>
+		<span class=field_label>Dialect:</span> <span class=dialect_content>{{Dialect}}</span>
+	</div>
+{{/Dialect}}
+
+{{#Note}}
+  <hr>
+	<div class=field_container>
+		<span class=field_label>Note:</span> <span class=note_content>{{Note}}</span>
+	</div>
+{{/Note}}
+
+{{#Example}}
+  <hr>
+	<div class=field_container>
+		<span class=field_label>Example:</span> <span class=example_content>{{Example}}</span>
+	</div>
+{{/Example}}
+
+{{#Audio Front}}
+  <hr>
+	<div class=field_container>
+		<span class=audio_content>{{Audio Front}}</span>
+	</div>
+{{/Audio Front}}

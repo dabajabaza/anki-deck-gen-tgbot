@@ -9,7 +9,8 @@ Tips / Dialect / Note / Example необязательны. Пример тог�
 import re
 
 from anki_deck_gen.domain import Row, Theme
-from anki_deck_gen.notetypes.base import NoteType, register
+from anki_deck_gen.notetypes import assets
+from anki_deck_gen.notetypes.base import NoteType, card, register
 
 COL_TIPS = "Tips"
 COL_DIALECT = "Dialect"
@@ -130,76 +131,9 @@ def colour_dialect(dialect: str) -> str:
     return f'<font color="{color}">{dialect}</font>'
 
 
-_EXTRA_BLOCK = (
-    "{{{{#{field}}}}}\n"
-    "  <hr>\n"
-    "\t<div class=field_container>\n"
-    "\t\t<span class=field_label>{field}:</span> <span class={cls}_content>{{{{{field}}}}}</span>\n"
-    "\t</div>\n"
-    "{{{{/{field}}}}}"
-)
-_AUDIO_BLOCK = (
-    "{{#Audio Front}}\n"
-    "  <hr>\n"
-    "\t<div class=field_container>\n"
-    "\t\t<span class=audio_content>{{Audio Front}}</span>\n"
-    "\t</div>\n"
-    "{{/Audio Front}}"
-)
-
-
-def _block(field: str) -> str:
-    return _EXTRA_BLOCK.format(field=field, cls=field.lower())
-
-
-# Четыре шаблона старого каталога two-way_typing_with_audio_and_extra_fields,
-# {{Audio}} → {{Audio Front}}: озвучен только изучаемый (вьетнамский) язык.
-VI_TO_EN_QFMT = (
-    "{{Front}}\n\n<div class=input>\n    {{type:Back}}\n</div>\n\n"
-    + _block(COL_DIALECT)
-    + "\n\n"
-    + _block(COL_TIPS)
-)
-VI_TO_EN_AFMT = (
-    "{{Front}}\n\n<hr id=answer>\n\n<div class=back>\n    {{type:Back}}\n</div>\n\n"
-    + _block(COL_DIALECT)
-    + "\n\n"
-    + _block(COL_NOTE)
-    + "\n\n"
-    + _block(COL_EXAMPLE)
-    + "\n\n"
-    + _AUDIO_BLOCK
-)
-EN_TO_VI_QFMT = "{{Back}}\n\n{{type:Front}}\n\n" + _block(COL_DIALECT) + "\n\n" + _block(COL_TIPS)
-EN_TO_VI_AFMT = (
-    "{{Back}}\n\n<hr id=answer>\n\n<div class=back>\n    {{type:Front}}\n</div>\n\n"
-    + _block(COL_DIALECT)
-    + "\n\n"
-    + _block(COL_NOTE)
-    + "\n\n"
-    + _block(COL_EXAMPLE)
-    + "\n\n"
-    + _AUDIO_BLOCK
-)
-
-CSS = (
-    "input {\n"
-    "    font-size: 0.5em;\n"
-    "    font-family: ayuthaya;\n"
-    "}\n"
-    ".card {\n"
-    "    font-family: ayuthaya;\n"
-    "    font-size: 2.5em;\n"
-    "    text-align: center;\n"
-    "    background-color: white;\n"
-    "}\n"
-    ".field_container {\n"
-    "    font-size: 0.7em;\n"
-    "}\n"
-    ".field_label {\n"
-    "    color: gray\n"
-    "}\n"
-)
+# Шаблоны и стиль — assets/templates/vietnamese.card*.html и assets/css/vietnamese.css:
+# перенос каталога two-way_typing_with_audio_and_extra_fields старого генератора,
+# где {{Audio}} стало {{Audio Front}} — озвучен только изучаемый, вьетнамский, язык.
 
 
 @register
@@ -229,13 +163,13 @@ class Vietnamese(NoteType):
 
     def templates(self) -> list[dict[str, str]]:
         return [
-            {"name": "Вьетнамский → Английский", "qfmt": VI_TO_EN_QFMT, "afmt": VI_TO_EN_AFMT},
-            {"name": "Английский → Вьетнамский", "qfmt": EN_TO_VI_QFMT, "afmt": EN_TO_VI_AFMT},
+            card("Вьетнамский → Английский", self.id, 1),
+            card("Английский → Вьетнамский", self.id, 2),
         ]
 
     def css(self, theme: Theme) -> str:
         # Свой CSS из старых шаблонов; Оформление сюда не применяется (themed = False).
-        return CSS
+        return assets.css("vietnamese")
 
     def note_fields(self, row: Row, *, audio_q: str, audio_a: str) -> list[str]:
         return [

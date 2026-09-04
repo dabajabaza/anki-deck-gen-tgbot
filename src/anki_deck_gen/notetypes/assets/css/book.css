@@ -1,0 +1,80 @@
+/* Тема «Учебник»: слоновая кость, антиква, двойная линейка, кирпичный акцент. */
+.card {
+    font-family: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, "Noto Serif",
+        "Times New Roman", serif;
+    font-size: 25px;
+    line-height: 1.38;
+    text-align: center;
+    color: #2a2420;
+    background-color: #fbf7ee;
+    max-width: 30em;
+    margin: 0 auto;
+    padding: 1.8em 1.2em;
+    box-sizing: border-box;
+    overflow-wrap: break-word;
+}
+hr#answer {
+    border: 0;
+    border-top: 1px solid #b7a58b;
+    border-bottom: 1px solid #b7a58b;
+    height: 3px;
+    width: 6em;
+    margin: 1.3em auto;
+    background: transparent;
+}
+.replay-button {
+    padding: 0.25em;
+    margin: 0 0 0 0.1em;
+    vertical-align: middle;
+}
+/* Размер в em: иконка идёт по строке и растёт вместе с текстом, в том числе когда
+   человек увеличил шрифт на телефоне. 24 px — пол, чтобы в мелкий шрифт не съёжилась. */
+.replay-button svg, .replay-button span svg {
+    width: 1em;
+    height: 1em;
+    min-width: 24px;
+    min-height: 24px;
+}
+.replay-button svg circle { fill: none; stroke: #b4432f; stroke-width: 4.5; }
+.replay-button svg path { fill: #b4432f; }
+/* Поле ввода и сравнение Anki рисует с inline-шрифтом (Arial 20px): нужен !important. */
+input#typeans {
+    font-family: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, "Noto Serif",
+        "Times New Roman", serif !important;
+    font-size: 23px !important;
+    line-height: 1.4;
+    text-align: center;
+    padding: 0.3em 0.4em;
+    margin-top: 0.6em;
+    border: 0;
+    border-bottom: 2px solid #b7a58b;
+    border-radius: 0;
+    background: transparent;
+    color: inherit;
+    outline: none;
+    max-width: 22em;
+}
+input#typeans:focus { border-bottom-color: #b4432f; }
+code#typeans {
+    font-family: Charter, "Bitstream Charter", "Iowan Old Style", Georgia, "Noto Serif",
+        "Times New Roman", serif !important;
+    font-size: 23px !important;
+    line-height: 1.6;
+}
+.typeGood { background: #dcebd3; color: #2c4a22; border-radius: 3px; }
+.typeBad {
+    background: #f3d3c9; color: #7a2b1c; border-radius: 3px;
+    text-decoration: line-through;
+}
+.typeMissed { background: #e9e1d1; color: #5c5145; border-radius: 3px; }
+#typearrow { color: #9a8c76; }
+
+.card.nightMode { color: #ece5d8; background-color: #221f1c; }
+.nightMode hr#answer { border-color: #6b5e4d; }
+.nightMode .replay-button svg circle { stroke: #e0735f; }
+.nightMode .replay-button svg path { fill: #e0735f; }
+.nightMode input#typeans { border-bottom-color: #6b5e4d; color: #ece5d8; }
+.nightMode input#typeans:focus { border-bottom-color: #e0735f; }
+.nightMode .typeGood { background: #2f4d2a; color: #d9efd0; }
+.nightMode .typeBad { background: #5e2b20; color: #f7d6cc; }
+.nightMode .typeMissed { background: #3f392f; color: #ddd4c4; }

@@ -1,0 +1,16 @@
+input {
+    font-size: 0.5em;
+    font-family: ayuthaya;
+}
+.card {
+    font-family: ayuthaya;
+    font-size: 2.5em;
+    text-align: center;
+    background-color: white;
+}
+.field_container {
+    font-size: 0.7em;
+}
+.field_label {
+    color: gray
+}

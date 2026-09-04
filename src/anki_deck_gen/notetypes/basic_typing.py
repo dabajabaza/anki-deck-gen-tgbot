@@ -2,13 +2,11 @@
 
 from anki_deck_gen.domain import Row
 from anki_deck_gen.notetypes import stock
-from anki_deck_gen.notetypes.base import NoteType, register
+from anki_deck_gen.notetypes.base import NoteType, card, register
 from anki_deck_gen.notetypes.basic import stock_fields, stock_note_fields
 
 # На лице озвучки ответа нет: она выдала бы ответ до того, как его набрали.
 # На обороте — {{Front}} с озвучкой вопроса, а не {{FrontSide}}: см. stock.py.
-TYPE_QFMT = "{{Front}}{{Audio Front}}\n\n{{type:Back}}"
-TYPE_AFMT = "{{Front}}{{Audio Front}}\n\n<hr id=answer>\n\n{{type:Back}}{{Audio Back}}"
 
 
 @register
@@ -23,7 +21,7 @@ class BasicTyping(NoteType):
         return stock_fields()
 
     def templates(self) -> list[dict[str, str]]:
-        return [{"name": stock.CARD_1, "qfmt": TYPE_QFMT, "afmt": TYPE_AFMT}]
+        return [card(stock.CARD_1, self.id, 1)]
 
     def note_fields(self, row: Row, *, audio_q: str, audio_a: str) -> list[str]:
         return stock_note_fields(row, audio_q=audio_q, audio_a=audio_a)
