@@ -11,6 +11,7 @@ from abc import ABC, abstractmethod
 from typing import ClassVar
 
 from anki_deck_gen.domain import COL_A, COL_Q, Row, Theme
+from anki_deck_gen.notetypes.theme import css_for as theme_css
 
 # Суффикс к имени типа внутри Anki. Без него пакет с типом «Простая», но с
 # другим id, при импорте породил бы у пользователя дубль «Простая-a1b2c3»
@@ -41,9 +42,15 @@ class NoteType(ABC):
     def templates(self) -> list[dict[str, str]]:
         """Шаблоны карточек в форме genanki: {"name", "qfmt", "afmt"}."""
 
-    @abstractmethod
     def css(self, theme: Theme) -> str:
-        """Таблица стилей типа для выбранного Оформления."""
+        """Таблица стилей типа для выбранного Оформления.
+
+        Не абстрактный: у стоковых типов реализация одна и та же, и три её копии
+        расходились бы. Тип со своим CSS переопределяет метод и ставит
+        ``themed = False``, иначе бот предложит выбрать Оформление, которое ни на
+        что не влияет.
+        """
+        return theme_css(theme)
 
     @abstractmethod
     def note_fields(self, row: Row, *, audio_q: str, audio_a: str) -> list[str]:
