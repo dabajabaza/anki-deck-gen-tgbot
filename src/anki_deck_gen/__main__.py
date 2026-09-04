@@ -67,6 +67,10 @@ _CONNECT_RETRY_START_S = 3.0
 _CONNECT_RETRY_MAX_S = 30.0
 _CONNECT_BUDGET_S = 600.0
 _START_EXTEND_USEC = 120 * 1_000_000
+# Сколько ждём начатые обработчики после сигнала остановки. Супервизор даёт
+# процессу 10 с до SIGKILL, и следом за этим ожиданием идёт ожидание воркера
+# (5 с), поэтому запас держим: 3 с хватает на пару обращений к Telegram.
+_HANDLER_GRACE_S = 3.0
 # 5xx и 429 — родственники TelegramAPIError, а не сетевые ошибки, и оба проходят
 # сами; считать их фатальными — сжечь лимит перезапусков.
 _RETRYABLE = (TelegramNetworkError, TelegramServerError, TelegramRetryAfter)
@@ -245,6 +249,11 @@ async def _run_bot(settings: BotSettings, *, build: Builder) -> None:
             close_bot_session=False,
         )
     finally:
+        # Сначала обработчики: aiogram по сигналу отменяет только опрос, а
+        # начатые апдейты живут отдельными задачами. Закрыть сессию под ними —
+        # это ServerDisconnectedError посреди ответа и статус «Читаю таблицу…»,
+        # висящий у человека навсегда (так терялось сообщение при выкатке).
+        await _drain_handlers(dp, grace=_HANDLER_GRACE_S)
         worker_task.remove_done_callback(_worker_died)
         worker_task.cancel()
         watchdog_task.cancel()
@@ -253,6 +262,27 @@ async def _run_bot(settings: BotSettings, *, build: Builder) -> None:
         await asyncio.gather(worker_task, watchdog_task, return_exceptions=True)
         await bot.session.close()
         await engine.dispose()
+
+
+async def _drain_handlers(dp: Dispatcher, *, grace: float) -> None:
+    """Дать начатым обработчикам договорить, прежде чем закрывать сеть.
+
+    Задачи апдейтов aiogram держит в ``_handle_update_tasks``; своего ожидания у
+    неё нет — ``start_polling`` возвращается сразу после отмены опроса. Не
+    дождались за ``grace`` — идём дальше: держать процесс дольше нельзя, за нами
+    супервизор с SIGKILL.
+    """
+    tasks = {task for task in getattr(dp, "_handle_update_tasks", set()) if not task.done()}
+    if not tasks:
+        return
+    logger.info("shutting down: waiting up to %.0fs for %d handler(s)", grace, len(tasks))
+    _, pending = await asyncio.wait(tasks, timeout=grace)
+    if pending:
+        logger.warning(
+            "%d handler(s) still running after %.0fs; their status messages stay as they are",
+            len(pending),
+            grace,
+        )
 
 
 def _worker_died(task: asyncio.Task[None]) -> None:

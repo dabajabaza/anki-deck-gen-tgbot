@@ -110,6 +110,21 @@ def test_model_ids_are_distinct_and_none_of_the_old_generator_ids() -> None:
     assert not set(ids) & OLD_MODEL_IDS
 
 
+def test_button_labels_are_short_enough_for_a_phone() -> None:
+    """На узком экране Telegram обрезает подпись около 26 символов и без многоточия.
+
+    Перенос строки в подписи он игнорирует — проверено на телефоне, поэтому
+    длинное имя типа живёт в тексте шага, а на кнопке стоит короткое.
+    """
+    buttons = [nt.button for nt in notetypes.REGISTRY.values()]
+    assert len(set(buttons)) == len(buttons), "подписи должны различаться"
+    for note_type in notetypes.REGISTRY.values():
+        assert note_type.button, note_type.id
+        assert len(note_type.button) <= 26, f"{note_type.id}: {note_type.button}"
+        assert "\n" not in note_type.button, "Telegram переносы в подписях не показывает"
+        assert note_type.label != note_type.button or note_type.id == "basic"
+
+
 def test_anki_name_carries_the_suffix_so_it_cannot_shadow_the_stock_type() -> None:
     assert notetypes.get("basic").anki_name() == "Простая" + ANKI_NAME_SUFFIX
 

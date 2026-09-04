@@ -140,6 +140,7 @@ def colour_dialect(dialect: str) -> str:
 class Vietnamese(NoteType):
     id = "vietnamese"
     label = "Вьетнамский словарь (с тонами)"
+    button = "Вьетнамский"
     description = (
         "Две карточки с вводом ответа; слова раскрашены по тонам. "
         "Необязательные колонки: Tips, Dialect, Note, Example."

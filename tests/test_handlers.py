@@ -7,6 +7,7 @@
 from aiogram.methods import SendDocument, SendMessage
 from aiogram.types import LinkPreviewOptions
 
+from anki_deck_gen import notetypes
 from anki_deck_gen.bot import callbacks, texts
 from anki_deck_gen.domain import AudioSide, DeckSettings, Problem, Sheet, Table, Theme
 from anki_deck_gen.errors import FileTooLarge, TableUnreadable
@@ -116,7 +117,9 @@ async def test_a_clean_table_shows_summary_and_note_types(harness: BotHarness) -
     assert texts.SUMMARY_NOTES.format(count=2) in summary
     assert texts.CHOOSE_NOTE_TYPE in summary
     labels = harness.session.last_edit_labels()
-    assert "Простая" in labels and texts.BTN_RENAME in labels
+    assert texts.BTN_RENAME in labels
+    # На кнопках короткие подписи, полное имя типа — на следующем шаге.
+    assert [nt.button for nt in notetypes.REGISTRY.values() if nt.visible_in_bot] == labels[:-1]
     assert harness.pending.get(ADMIN_ID) is not None
 
 

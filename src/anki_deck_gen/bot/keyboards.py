@@ -35,7 +35,7 @@ def note_types(types: list[NoteType]) -> InlineKeyboardMarkup:
         *(
             [
                 InlineKeyboardButton(
-                    text=texts.note_type_button(nt.label),
+                    text=nt.button,
                     callback_data=callbacks.note_type(nt.id),
                 )
             ]

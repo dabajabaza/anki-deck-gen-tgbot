@@ -14,6 +14,7 @@ from anki_deck_gen.notetypes.basic import stock_card_1, stock_fields, stock_note
 class BasicReversed(NoteType):
     id = "basic-reversed"
     label = "Простая (с обратной карточкой)"
+    button = "Обратная карточка"
     description = "Две карточки на запись: вопрос → ответ и ответ → вопрос."
     model_id = 1756900002
     cards_per_note = 2

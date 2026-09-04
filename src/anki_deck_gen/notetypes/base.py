@@ -24,7 +24,11 @@ class NoteType(ABC):
     """Тип записи Anki, каким его видит генератор."""
 
     id: ClassVar[str]
-    label: ClassVar[str]  # имя как в русской локализации Anki — оно же подпись кнопки
+    label: ClassVar[str]  # имя как в русской локализации Anki — для текстов
+    # Подпись кнопки. Отдельно от label: на телефоне кнопка обрезается около 26
+    # символов, а перенос строки Telegram в подписях игнорирует. Полное имя типа
+    # человек видит на следующем шаге («Тип записи: …»), связь с Anki не теряется.
+    button: ClassVar[str]
     description: ClassVar[str]  # одно предложение для подсказки в боте
     model_id: ClassVar[int]  # фиксированный; сменил поля — сменил id (ARCHITECTURE)
     cards_per_note: ClassVar[int]
