@@ -120,15 +120,55 @@ async def test_a_clean_table_shows_summary_and_note_types(harness: BotHarness) -
     assert harness.pending.get(ADMIN_ID) is not None
 
 
-async def test_pasted_text_asks_for_a_deck_name_first(harness: BotHarness) -> None:
-    await harness.send("cat / кот\ndog / пёс", user_id=ADMIN_ID)
-    assert harness.session.last_text() == texts.ASK_DECK_NAME
-    harness.session.clear()
+async def test_pasted_text_accumulates_until_done_is_pressed(harness: BotHarness) -> None:
+    """Строки копятся черновиком: по одной или пачкой, пока не нажали «Готово»."""
+    await harness.send("cat / кот", user_id=ADMIN_ID)
+    assert texts.DRAFT_TITLE in harness.session.last_text()
+    assert texts.BTN_DRAFT_DONE in harness.session.last_labels()
 
+    await harness.send("dog / пёс\nbird / птица", user_id=ADMIN_ID)
+    assert texts.DRAFT_NOTES.format(count=3) in harness.session.last_text()
+    item = harness.pending.get(ADMIN_ID)
+    assert item is not None and item.draft is not None and len(item.table.rows) == 3
+
+    await harness.press(callbacks.DRAFT_DONE, user_id=ADMIN_ID)
+    assert harness.session.last_text() == texts.ASK_DECK_NAME
     await harness.send("Животные", user_id=ADMIN_ID)
     assert "Колода «Животные»" in harness.session.last_edit_text()
+    assert texts.CHOOSE_NOTE_TYPE in harness.session.last_edit_text()
     item = harness.pending.get(ADMIN_ID)
-    assert item is not None and item.deck_name == "Животные"
+    assert item is not None and item.draft is None, "черновик закрыт"
+
+
+async def test_a_line_without_a_separator_joins_the_draft_as_a_problem_row(
+    harness: BotHarness,
+) -> None:
+    """Внутри черновика годится любой текст: человек уже сказал, что набирает колоду."""
+    await harness.send("cat / кот", user_id=ADMIN_ID)
+    await harness.send("просто фраза", user_id=ADMIN_ID)
+    assert texts.DRAFT_PROBLEMS.format(count=1) in harness.session.last_text()
+
+    await harness.press(callbacks.DRAFT_DONE, user_id=ADMIN_ID)
+    await harness.send("Звери", user_id=ADMIN_ID)
+    item = harness.pending.get(ADMIN_ID)
+    assert item is not None
+    assert [p.problem for p in item.unresolved()] == [Problem.NO_SEPARATOR]
+
+
+async def test_a_file_replaces_an_open_draft(harness: BotHarness) -> None:
+    """Файл и ссылка не двусмысленны — это новая Таблица, а не строка черновика."""
+    await harness.send("cat / кот", user_id=ADMIN_ID)
+    harness.loader.tables["deck.xlsx"] = make_table(("a", "б"), title="deck")
+    await harness.send_document("deck.xlsx", user_id=ADMIN_ID)
+    item = harness.pending.get(ADMIN_ID)
+    assert item is not None and item.draft is None and item.deck_name == "deck"
+
+
+async def test_cancelling_a_draft_forgets_it(harness: BotHarness) -> None:
+    await harness.send("cat / кот", user_id=ADMIN_ID)
+    await harness.press(callbacks.DRAFT_CANCEL, user_id=ADMIN_ID)
+    assert harness.session.last_edit_text() == texts.DRAFT_CANCELLED
+    assert harness.pending.get(ADMIN_ID) is None
 
 
 async def test_a_single_line_is_not_a_table(harness: BotHarness) -> None:
@@ -240,6 +280,7 @@ async def test_cancel_button_forgets_the_table(harness: BotHarness) -> None:
 
 async def test_a_separatorless_line_is_fixed_with_a_full_pair(harness: BotHarness) -> None:
     await harness.send("cat / кот\nтут нет разделителя\ndog / пёс", user_id=ADMIN_ID)
+    await harness.press(callbacks.DRAFT_DONE, user_id=ADMIN_ID)
     await harness.send("Звери", user_id=ADMIN_ID)
     item = harness.pending.get(ADMIN_ID)
     assert item is not None

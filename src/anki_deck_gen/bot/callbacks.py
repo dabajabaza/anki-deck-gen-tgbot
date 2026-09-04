@@ -19,6 +19,9 @@ CALLBACK_DATA_LIMIT = 64
 PROBLEMS_FIX = "p:fix"
 PROBLEMS_SKIP = "p:skip"
 PROBLEMS_CANCEL = "p:cancel"
+# Черновик текстом: закончить приём строк или выбросить накопленное.
+DRAFT_DONE = "d:done"
+DRAFT_CANCEL = "d:cancel"
 # Переименовать колоду.
 RENAME = "rename"
 # Кнопка, которая ничего не делает (заголовок внутри клавиатуры).
