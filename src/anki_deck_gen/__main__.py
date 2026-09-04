@@ -108,7 +108,7 @@ def build_dispatcher(
 
     dp.include_router(admin.router)  # первым: его команды прерывают диалоги
     dp.include_router(start.router)
-    dp.include_router(source.router)  # новая Таблица сбрасывает любой диалог
+    dp.include_router(source.router)  # файл и ссылка сбрасывают любой диалог
     dp.include_router(fix.router)
     dp.include_router(settings_handlers.router)
     dp.include_router(fallback.router)  # последним: ловит всё остальное

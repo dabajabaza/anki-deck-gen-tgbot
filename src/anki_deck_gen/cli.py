@@ -45,7 +45,7 @@ logger = logging.getLogger("anki_deck_gen.cli")
 _PROBLEM_TEXT = {
     Problem.EMPTY_QUESTION: "пустой вопрос",
     Problem.EMPTY_ANSWER: "пустой ответ",
-    Problem.NO_SEPARATOR: "нет разделителя « — » между вопросом и ответом",
+    Problem.NO_SEPARATOR: "нет разделителя « / » между вопросом и ответом",
 }
 
 

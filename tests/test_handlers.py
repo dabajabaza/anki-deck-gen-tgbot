@@ -121,7 +121,7 @@ async def test_a_clean_table_shows_summary_and_note_types(harness: BotHarness) -
 
 
 async def test_pasted_text_asks_for_a_deck_name_first(harness: BotHarness) -> None:
-    await harness.send("cat — кот\ndog - пёс", user_id=ADMIN_ID)
+    await harness.send("cat / кот\ndog / пёс", user_id=ADMIN_ID)
     assert harness.session.last_text() == texts.ASK_DECK_NAME
     harness.session.clear()
 
@@ -132,7 +132,7 @@ async def test_pasted_text_asks_for_a_deck_name_first(harness: BotHarness) -> No
 
 
 async def test_a_single_line_is_not_a_table(harness: BotHarness) -> None:
-    await harness.send("cat — кот", user_id=ADMIN_ID)
+    await harness.send("cat кот", user_id=ADMIN_ID)
     assert harness.session.last_text() == texts.ERR_UNSUPPORTED
 
 
@@ -239,7 +239,7 @@ async def test_cancel_button_forgets_the_table(harness: BotHarness) -> None:
 
 
 async def test_a_separatorless_line_is_fixed_with_a_full_pair(harness: BotHarness) -> None:
-    await harness.send("cat — кот\nтут нет разделителя\ndog — пёс", user_id=ADMIN_ID)
+    await harness.send("cat / кот\nтут нет разделителя\ndog / пёс", user_id=ADMIN_ID)
     await harness.send("Звери", user_id=ADMIN_ID)
     item = harness.pending.get(ADMIN_ID)
     assert item is not None
@@ -247,8 +247,20 @@ async def test_a_separatorless_line_is_fixed_with_a_full_pair(harness: BotHarnes
     await harness.press(callbacks.PROBLEMS_FIX, user_id=ADMIN_ID)
     await harness.send("всё ещё без", user_id=ADMIN_ID)
     assert harness.session.last_text() == texts.FIX_STILL_NO_SEPARATOR
-    await harness.send("bird — птица", user_id=ADMIN_ID)
+    await harness.send("bird / птица", user_id=ADMIN_ID)
     assert item.fixes[(None, 2)].question == "bird"
+
+
+async def test_text_during_a_dialog_answers_it_instead_of_starting_a_table(
+    harness: BotHarness,
+) -> None:
+    """«bird / птица» — и ответ на правку, и текст-таблица; в диалоге выигрывает ответ."""
+    harness.loader.tables["p.xlsx"] = _table_with_problems()
+    await harness.send_document("p.xlsx", user_id=ADMIN_ID)
+    await harness.press(callbacks.RENAME, user_id=ADMIN_ID)
+    await harness.send("Звери / птицы", user_id=ADMIN_ID)
+    item = harness.pending.get(ADMIN_ID)
+    assert item is not None and item.deck_name == "Звери / птицы"
 
 
 async def test_a_new_table_resets_a_fix_dialog(harness: BotHarness) -> None:

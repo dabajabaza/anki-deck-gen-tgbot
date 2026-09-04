@@ -18,7 +18,11 @@ STOCK_REVERSE_QFMT = "{{Back}}"
 STOCK_REVERSE_AFMT = "{{FrontSide}}\n\n<hr id=answer>\n\n{{Front}}"
 
 STOCK_TYPE_QFMT = "{{Front}}\n\n{{type:Back}}"
-STOCK_TYPE_AFMT = "{{FrontSide}}\n\n<hr id=answer>\n\n{{type:Back}}"
+# На обороте карточки с вводом ответа Anki ставит {{Front}}, а НЕ {{FrontSide}}:
+# лицевая сторона уже содержит разбор набранного, и через FrontSide он выводится
+# второй раз, да ещё с лишней чертой — Anki подставляет <hr id=answer> перед
+# разбором сам, когда видит FrontSide (`typeAnsAnswerFilter`).
+STOCK_TYPE_AFMT = "{{Front}}\n\n<hr id=answer>\n\n{{type:Back}}"
 
 # Имена шаблонов карточек — тоже из локализации (`notetypes-card-1-name`).
 CARD_1 = "Карточка 1"

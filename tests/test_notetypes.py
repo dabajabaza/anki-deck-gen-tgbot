@@ -10,8 +10,14 @@ from tests.helpers.tables import make_row
 OLD_MODEL_IDS = {2163323615, 2163323616, 2163323618, 1759261800, 1762620000}
 
 
-def test_registry_holds_the_three_stock_types_and_the_vietnamese_one_in_order() -> None:
-    assert list(notetypes.REGISTRY) == ["basic", "basic-reversed", "basic-typing", "vietnamese"]
+def test_registry_holds_the_stock_types_then_ours_then_the_vietnamese_one() -> None:
+    assert list(notetypes.REGISTRY) == [
+        "basic",
+        "basic-reversed",
+        "basic-typing",
+        "basic-typing-reversed",
+        "vietnamese",
+    ]
 
 
 def test_unknown_id_raises() -> None:
@@ -47,6 +53,25 @@ def test_the_typing_question_side_never_plays_the_answer_audio() -> None:
     (card,) = notetypes.get("basic-typing").templates()
     assert stock.AUDIO_BACK not in card["qfmt"]
     assert stock.AUDIO_FRONT in card["qfmt"]
+
+
+def test_no_typing_template_uses_frontside() -> None:
+    """{{FrontSide}} на обороте выводит разбор набранного второй раз (см. stock.py)."""
+    for note_type_id in ("basic-typing", "basic-typing-reversed", "vietnamese"):
+        for card in notetypes.get(note_type_id).templates():
+            assert "{{FrontSide}}" not in card["afmt"], f"{note_type_id}: {card['name']}"
+
+
+def test_the_two_way_typing_type_asks_both_directions_and_hides_the_answer_audio() -> None:
+    two_way = notetypes.get("basic-typing-reversed")
+    assert two_way.cards_per_note == 2
+    assert two_way.fields() == notetypes.get("basic").fields(), "колонки Таблицы те же"
+    forward, reverse = two_way.templates()
+    assert "{{type:Back}}" in forward["qfmt"] and "{{type:Front}}" in reverse["qfmt"]
+    # Озвучка стороны, которую набирают, на вопросе не звучит — иначе это подсказка.
+    assert stock.AUDIO_BACK not in forward["qfmt"]
+    assert stock.AUDIO_FRONT not in reverse["qfmt"]
+    assert stock.AUDIO_BACK in forward["afmt"] and stock.AUDIO_FRONT in reverse["afmt"]
 
 
 def test_stock_types_take_their_css_from_the_chosen_theme() -> None:
@@ -90,7 +115,7 @@ def test_anki_name_carries_the_suffix_so_it_cannot_shadow_the_stock_type() -> No
 
 def test_compatible_filters_by_required_columns_and_visibility() -> None:
     with_qa = notetypes.compatible(frozenset({"Q", "A"}))
-    assert [nt.id for nt in with_qa] == ["basic", "basic-reversed", "basic-typing", "vietnamese"]
+    assert [nt.id for nt in with_qa] == list(notetypes.REGISTRY)
     assert notetypes.compatible(frozenset({"Q"})) == []
 
 
