@@ -66,7 +66,9 @@ uv run anki-deck-gen --source table.xlsx --note-type basic-reversed \
 Новый модуль + одна строка импорта в `notetypes/__init__.py` — и тип виден в CLI и в
 боте. Правило: изменили поля типа — смените `model_id`. Оформление карточек (темы
 «Карточка» и «Учебник») — CSS в `notetypes/theme.py`; тип со своим CSS ставит
-`themed = False`, и бот не спрашивает у него оформление.
+`themed = False`, и бот не спрашивает у него оформление. Как темы выглядят —
+`themes/preview.html`: откройте файл в браузере, там же переключатель ночного режима.
+Страница собирается из самих тем: `uv run python scripts/build_theme_preview.py`.
 
 ## Разработка
 
