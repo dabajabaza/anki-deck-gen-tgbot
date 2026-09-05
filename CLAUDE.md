@@ -47,9 +47,11 @@ prefs), `bot/` (aiogram: handlers, texts, keyboards, pending, storage, middlewar
   otherwise. Old generator ids (2163323615/16/18, 1759261800, 1762620000) are retired.
 - **`access.py` needs `db/engine.py::create_db`** (`isolation_level=None` for SAVEPOINT,
   `READONLY` execution option for the per-update auth check). Do not swap the engine.
-- **Texts are plain, Russian, in `bot/texts.py`.** No parse_mode anywhere except `HELP`
-  (HTML, sent from `handlers/start.py` with link preview disabled; the example URL is
-  escaped). `tests/test_texts.py` rejects `<`/`>` elsewhere and unknown placeholders.
+- **Texts are plain, Russian, in `bot/texts.py`.** parse_mode=HTML only for `HELP` and
+  the four settings screens (`choose_languages`/`choose_pair`/`choose_audio`/`choose_theme`)
+  — the texts that interpolate nothing user-supplied; their helpers escape anyway.
+  `tests/test_texts.py` keeps `HTML_TEXTS` in sync with reality and rejects `<`/`>`
+  everywhere else. Summary and verdict stay plain: they quote sheet names and table rows.
 - **Card CSS lives in `notetypes/assets/css/*.css`** (`Theme.CARD`/`Theme.BOOK`), not in the note
   types. Changing CSS needs no new `model_id` (Anki updates a same-schema type on import
   when mtime is newer); `themed = False` on a type skips the theme step in the bot.
