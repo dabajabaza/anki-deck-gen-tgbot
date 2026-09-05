@@ -118,6 +118,9 @@ def test_button_labels_fit_a_phone_screen() -> None:
     assert labels, "подписи кнопок разъехались по другим именам"
     for name, value in labels.items():
         assert _button_width(value) <= 44, f"{name}: {value}"
+    # Единственная подпись с подстановкой: коды языков, самый длинный — три буквы.
+    longest = DeckSettings(note_type_id="basic", lang_q="vie", lang_a="rus", audio=AudioSide.BOTH)
+    assert _button_width(texts.last_button(longest)) <= 44, texts.last_button(longest)
 
 
 def test_plural_forms() -> None:

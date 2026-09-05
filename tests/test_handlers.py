@@ -402,7 +402,7 @@ async def test_last_used_button_appears_and_reuses_languages_and_theme(
     harness.loader.tables["deck.xlsx"] = make_table(("a", "б"), title="deck")
     await harness.send_document("deck.xlsx", user_id=ADMIN_ID)
     await harness.press(callbacks.note_type("basic-typing"), user_id=ADMIN_ID)
-    assert texts.BTN_LANG_LAST in harness.session.last_edit_labels()
+    assert "Как в прошлый раз: vi → en" in harness.session.last_edit_labels()
     # Что именно было в прошлый раз — в тексте: на кнопке это не помещается.
     screen = harness.session.last_edit_text()
     assert "Tiếng Việt" in screen and "Учебник" in screen

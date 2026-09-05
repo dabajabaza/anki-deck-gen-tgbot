@@ -140,7 +140,7 @@ THEME_OPTION = "{name} — {description}"
 
 BTN_LANG_DEFAULT = "English → Русский, озвучен English"
 BTN_LANG_NONE = "Без озвучки"
-BTN_LANG_LAST = "Как в прошлый раз"
+BTN_LANG_LAST = "Как в прошлый раз: {pair}"
 BTN_LANG_CONFIGURE = "Настроить…"
 BTN_AUDIO_NONE = "Ничего"
 BTN_AUDIO_Q = "Вопрос ({lang})"
@@ -266,6 +266,15 @@ def theme_name(theme: Theme) -> str:
 
 def theme_description(theme: Theme) -> str:
     return THEME_CARD_DESCRIPTION if theme is Theme.CARD else THEME_BOOK_DESCRIPTION
+
+
+def last_button(settings: DeckSettings) -> str:
+    """Подпись «Как в прошлый раз»: пара языков кодами, чтобы влезла.
+
+    Полными именами («English → Русский») подпись обрезается на телефоне, а
+    озвучка и оформление не влезают и кодами — они идут строкой над клавиатурой.
+    """
+    return BTN_LANG_LAST.format(pair=f"{settings.lang_q} → {settings.lang_a}")
 
 
 def choose_languages(label: str, last: DeckSettings | None) -> str:

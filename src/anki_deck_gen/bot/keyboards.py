@@ -56,7 +56,7 @@ def languages(note_type_id: str, last: DeckSettings | None) -> InlineKeyboardMar
     last_row = (
         [
             InlineKeyboardButton(
-                text=texts.BTN_LANG_LAST,
+                text=texts.last_button(last),
                 callback_data=callbacks.last_used(note_type_id),
             )
         ]
