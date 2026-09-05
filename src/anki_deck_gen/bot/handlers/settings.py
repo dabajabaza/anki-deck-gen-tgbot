@@ -122,6 +122,7 @@ async def on_settings_step(
             item,
             texts.choose_theme(note_type.label, texts.audio_description(parsed.deck_settings())),
             keyboards.themes(note_type.id, parsed.lang_q, parsed.lang_a, parsed.audio),
+            parse_mode=ParseMode.HTML,
         )
         return
     else:
