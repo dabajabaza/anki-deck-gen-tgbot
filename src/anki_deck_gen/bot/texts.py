@@ -132,23 +132,25 @@ NO_COMPATIBLE_TYPES = (
 )
 NOTE_TYPE_NEEDS = "• {label}: нужны колонки {columns}"
 CHOOSE_LANGUAGES = "Тип записи: {label}.\nЯзыки и озвучка:"
+CHOOSE_LANGUAGES_LAST = "\nВ прошлый раз: {description}"
 CHOOSE_PAIR = "Тип записи: {label}.\nЯзык вопроса → язык ответа:"
 CHOOSE_AUDIO = "Тип записи: {label}. Языки: {pair}.\nЧто озвучить?"
-CHOOSE_THEME = "Тип записи: {label}. {description}.\nОформление карточек:"
+CHOOSE_THEME = "Тип записи: {label}. {description}.\nОформление карточек:\n{options}"
+THEME_OPTION = "{name} — {description}"
 
 BTN_LANG_DEFAULT = "English → Русский, озвучен English"
 BTN_LANG_NONE = "Без озвучки"
-BTN_LANG_LAST = "Как в прошлый раз: {description}"
+BTN_LANG_LAST = "Как в прошлый раз"
 BTN_LANG_CONFIGURE = "Настроить…"
 BTN_AUDIO_NONE = "Ничего"
 BTN_AUDIO_Q = "Вопрос ({lang})"
 BTN_AUDIO_A = "Ответ ({lang})"
 BTN_AUDIO_BOTH = "Обе стороны"
 BTN_BACK = "← Назад"
-BTN_THEME_CARD = "Карточка — светлая карточка на сером фоне"
-BTN_THEME_BOOK = "Учебник — книжный шрифт на бумажном фоне"
 THEME_CARD = "Карточка"
 THEME_BOOK = "Учебник"
+THEME_CARD_DESCRIPTION = "светлая карточка на сером фоне"
+THEME_BOOK_DESCRIPTION = "книжный шрифт на бумажном фоне"
 
 LANG_NAMES = {
     "en": "English",
@@ -262,8 +264,30 @@ def theme_name(theme: Theme) -> str:
     return THEME_CARD if theme is Theme.CARD else THEME_BOOK
 
 
-def theme_button(theme: Theme) -> str:
-    return BTN_THEME_CARD if theme is Theme.CARD else BTN_THEME_BOOK
+def theme_description(theme: Theme) -> str:
+    return THEME_CARD_DESCRIPTION if theme is Theme.CARD else THEME_BOOK_DESCRIPTION
+
+
+def choose_languages(label: str, last: DeckSettings | None) -> str:
+    """Экран Языков. Что было в прошлый раз — текстом, а не на кнопке.
+
+    На кнопке это не помещается: Telegram режет подпись по ширине экрана и без
+    многоточия, а «Как в прошлый раз: English → Русский, озвучен English» длиннее
+    любого телефона.
+    """
+    text = CHOOSE_LANGUAGES.format(label=label)
+    if last is not None:
+        text += CHOOSE_LANGUAGES_LAST.format(description=settings_description(last))
+    return text
+
+
+def choose_theme(label: str, description: str) -> str:
+    """Экран Оформления: на кнопках только имена, пояснения — списком в тексте."""
+    options = "\n".join(
+        THEME_OPTION.format(name=theme_name(theme), description=theme_description(theme))
+        for theme in Theme
+    )
+    return CHOOSE_THEME.format(label=label, description=description, options=options)
 
 
 def audio_description(settings: DeckSettings) -> str:

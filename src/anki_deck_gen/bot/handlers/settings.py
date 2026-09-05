@@ -77,7 +77,7 @@ async def on_settings_step(
         await edit_status(
             bot,
             item,
-            texts.CHOOSE_LANGUAGES.format(label=note_type.label),
+            texts.choose_languages(note_type.label, last),
             keyboards.languages(note_type.id, last),
         )
         return
@@ -117,10 +117,7 @@ async def on_settings_step(
         await edit_status(
             bot,
             item,
-            texts.CHOOSE_THEME.format(
-                label=note_type.label,
-                description=texts.audio_description(parsed.deck_settings()),
-            ),
+            texts.choose_theme(note_type.label, texts.audio_description(parsed.deck_settings())),
             keyboards.themes(note_type.id, parsed.lang_q, parsed.lang_a, parsed.audio),
         )
         return

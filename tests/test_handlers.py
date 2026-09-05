@@ -360,10 +360,12 @@ async def test_the_default_language_button_enqueues_and_saves_prefs(harness: Bot
     )
     await harness.press(callbacks.settings(chosen), user_id=ADMIN_ID)
     # Языки выбраны — остался шаг оформления, Задания в очереди ещё нет.
-    assert "Оформление карточек" in harness.session.last_edit_text()
-    assert "озвучен English" in harness.session.last_edit_text()
+    screen = harness.session.last_edit_text()
+    assert "Оформление карточек" in screen and "озвучен English" in screen
+    # Пояснения тем — в тексте, на кнопках только имена: иначе не влезает.
+    assert texts.THEME_CARD_DESCRIPTION in screen and texts.THEME_BOOK_DESCRIPTION in screen
     labels = harness.session.last_edit_labels()
-    assert texts.BTN_THEME_CARD in labels and texts.BTN_THEME_BOOK in labels
+    assert texts.THEME_CARD in labels and texts.THEME_BOOK in labels
     assert harness.queue.load == 0
 
     await harness.press(callbacks.build(chosen), user_id=ADMIN_ID)
@@ -400,11 +402,10 @@ async def test_last_used_button_appears_and_reuses_languages_and_theme(
     harness.loader.tables["deck.xlsx"] = make_table(("a", "б"), title="deck")
     await harness.send_document("deck.xlsx", user_id=ADMIN_ID)
     await harness.press(callbacks.note_type("basic-typing"), user_id=ADMIN_ID)
-    labels = harness.session.last_edit_labels()
-    assert any(
-        "Как в прошлый раз" in label and "Tiếng Việt" in label and "Учебник" in label
-        for label in labels
-    )
+    assert texts.BTN_LANG_LAST in harness.session.last_edit_labels()
+    # Что именно было в прошлый раз — в тексте: на кнопке это не помещается.
+    screen = harness.session.last_edit_text()
+    assert "Tiếng Việt" in screen and "Учебник" in screen
 
     # «Как в прошлый раз» — одна кнопка до очереди, без шага оформления.
     await harness.press(callbacks.last_used("basic-typing"), user_id=ADMIN_ID)
