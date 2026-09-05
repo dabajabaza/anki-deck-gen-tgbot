@@ -12,6 +12,7 @@ import logging
 from dataclasses import replace
 
 from aiogram import Bot, F, Router
+from aiogram.enums import ParseMode
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
@@ -79,14 +80,16 @@ async def on_settings_step(
             item,
             texts.choose_languages(note_type.label, last),
             keyboards.languages(note_type.id, last),
+            parse_mode=ParseMode.HTML,
         )
         return
     if parsed.action == "cfg":
         await edit_status(
             bot,
             item,
-            texts.CHOOSE_PAIR.format(label=note_type.label),
+            texts.choose_pair(note_type.label),
             keyboards.language_pairs(note_type.id),
+            parse_mode=ParseMode.HTML,
         )
         return
     if parsed.action == "lp":
@@ -94,10 +97,9 @@ async def on_settings_step(
         await edit_status(
             bot,
             item,
-            texts.CHOOSE_AUDIO.format(
-                label=note_type.label, pair=texts.pair_label(parsed.lang_q, parsed.lang_a)
-            ),
+            texts.choose_audio(note_type.label, texts.pair_label(parsed.lang_q, parsed.lang_a)),
             keyboards.audio_sides(note_type.id, parsed.lang_q, parsed.lang_a),
+            parse_mode=ParseMode.HTML,
         )
         return
     if parsed.action == "last":
@@ -107,8 +109,9 @@ async def on_settings_step(
             await edit_status(
                 bot,
                 item,
-                texts.CHOOSE_PAIR.format(label=note_type.label),
+                texts.choose_pair(note_type.label),
                 keyboards.language_pairs(note_type.id),
+                parse_mode=ParseMode.HTML,
             )
             return
         chosen = replace(last, note_type_id=note_type.id)

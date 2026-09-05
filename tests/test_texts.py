@@ -59,7 +59,16 @@ def test_every_string_is_non_empty() -> None:
 
 
 # Единственные тексты с HTML: идут с parse_mode=HTML из handlers/start.py (A11).
-HTML_TEXTS = {"HELP", "HELP_EXAMPLE"}
+# Тексты с разметкой: справка и экраны Настроек. Их шлют с parse_mode=HTML
+# (A11); всё, что в них подставляется, экранируется вызывающим helper'ом.
+HTML_TEXTS = {
+    "HELP",
+    "HELP_EXAMPLE",
+    "CHOOSE_LANGUAGES",
+    "CHOOSE_PAIR",
+    "CHOOSE_AUDIO",
+    "CHOOSE_THEME",
+}
 _ALLOWED_TAGS = re.compile(r"</?b>|<a href=\"[^\"<>]*\">|</a>")
 
 
@@ -72,13 +81,29 @@ def test_no_markup_sneaks_in() -> None:
         assert "**" not in value and "__" not in value, name
 
 
-def test_help_uses_only_bold_and_links_and_closes_them() -> None:
+def test_the_list_of_marked_up_texts_matches_reality() -> None:
+    """Разметка в новом тексте — решение, а не случайность: объявите его здесь."""
+    with_tags = {name for name, value in _constants().items() if "<" in value or ">" in value}
+    assert with_tags == HTML_TEXTS
+
+
+def test_marked_up_texts_use_only_bold_and_links_and_close_them() -> None:
     for name in HTML_TEXTS:
         value = getattr(texts, name)
         stripped = _ALLOWED_TAGS.sub("", value)
         assert "<" not in stripped and ">" not in stripped and "&" not in stripped, name
         assert value.count("<b>") == value.count("</b>"), name
         assert value.count("<a href") == value.count("</a>"), name
+
+
+def test_settings_screens_escape_what_they_interpolate() -> None:
+    """Подписи типов сегодня безобидны, но экранирование не должно зависеть от этого."""
+    assert "&lt;b&gt;" in texts.choose_pair("<b>злой тип</b>")
+    assert "&lt;" in texts.choose_audio("<", "English → Русский")
+    assert "&amp;" in texts.choose_theme("A & B", "English → Русский, озвучен English")
+    screen = texts.choose_theme("Простая", "English → Русский")
+    assert "<b>Оформление карточек:</b>" in screen
+    assert "▫️ Карточка — светлая карточка на сером фоне" in screen
 
 
 def test_help_message_escapes_the_example_url() -> None:

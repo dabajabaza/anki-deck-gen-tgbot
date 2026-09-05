@@ -114,7 +114,12 @@ async def render_summary(bot: Bot, pending: Pending) -> None:
 
 
 async def edit_status(
-    bot: Bot, pending: Pending, text: str, keyboard: InlineKeyboardMarkup | None = None
+    bot: Bot,
+    pending: Pending,
+    text: str,
+    keyboard: InlineKeyboardMarkup | None = None,
+    *,
+    parse_mode: str | None = None,
 ) -> None:
     """Правка статус-сообщения, которая не роняет обработчик.
 
@@ -127,6 +132,7 @@ async def edit_status(
             message_id=pending.status_message_id,
             text=text,
             reply_markup=keyboard,
+            parse_mode=parse_mode,
         )
     except Exception as exc:
         logger.warning("status edit failed: %s: %s", type(exc).__name__, exc)

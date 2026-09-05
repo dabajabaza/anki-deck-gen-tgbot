@@ -131,12 +131,17 @@ NO_COMPATIBLE_TYPES = (
     "Поправьте заголовок и пришлите таблицу снова."
 )
 NOTE_TYPE_NEEDS = "• {label}: нужны колонки {columns}"
-CHOOSE_LANGUAGES = "Тип записи: {label}.\nЯзыки и озвучка:"
+# Экраны Настроек идут с parse_mode=HTML (A11): строки в них только наши —
+# имя Типа записи и названия языков, — и подставляемое всё равно экранируется.
+CHOOSE_LANGUAGES = "Тип записи: <b>{label}</b>\n\n<b>Языки и озвучка:</b>"
 CHOOSE_LANGUAGES_LAST = "\nВ прошлый раз: {description}"
-CHOOSE_PAIR = "Тип записи: {label}.\nЯзык вопроса → язык ответа:"
-CHOOSE_AUDIO = "Тип записи: {label}. Языки: {pair}.\nЧто озвучить?"
-CHOOSE_THEME = "Тип записи: {label}. {description}.\nОформление карточек:\n{options}"
-THEME_OPTION = "{name} — {description}"
+CHOOSE_PAIR = "Тип записи: <b>{label}</b>\n\n<b>Язык вопроса → язык ответа:</b>"
+CHOOSE_AUDIO = "Тип записи: <b>{label}</b>\nЯзыки: <b>{pair}</b>\n\n<b>Что озвучить?</b>"
+CHOOSE_THEME = (
+    "Тип записи: <b>{label}</b>\nЯзыки: <b>{description}</b>\n\n"
+    "<b>Оформление карточек:</b>\n{options}"
+)
+THEME_OPTION = "▫️ {name} — {description}"
 
 BTN_LANG_DEFAULT = "English → Русский, озвучен English"
 BTN_LANG_NONE = "Без озвучки"
@@ -284,19 +289,32 @@ def choose_languages(label: str, last: DeckSettings | None) -> str:
     многоточия, а «Как в прошлый раз: English → Русский, озвучен English» длиннее
     любого телефона.
     """
-    text = CHOOSE_LANGUAGES.format(label=label)
+    text = CHOOSE_LANGUAGES.format(label=html.escape(label))
     if last is not None:
-        text += CHOOSE_LANGUAGES_LAST.format(description=settings_description(last))
+        text += CHOOSE_LANGUAGES_LAST.format(description=html.escape(settings_description(last)))
     return text
+
+
+def choose_pair(label: str) -> str:
+    return CHOOSE_PAIR.format(label=html.escape(label))
+
+
+def choose_audio(label: str, pair: str) -> str:
+    return CHOOSE_AUDIO.format(label=html.escape(label), pair=html.escape(pair))
 
 
 def choose_theme(label: str, description: str) -> str:
     """Экран Оформления: на кнопках только имена, пояснения — списком в тексте."""
     options = "\n".join(
-        THEME_OPTION.format(name=theme_name(theme), description=theme_description(theme))
+        THEME_OPTION.format(
+            name=html.escape(theme_name(theme)),
+            description=html.escape(theme_description(theme)),
+        )
         for theme in Theme
     )
-    return CHOOSE_THEME.format(label=label, description=description, options=options)
+    return CHOOSE_THEME.format(
+        label=html.escape(label), description=html.escape(description), options=options
+    )
 
 
 def audio_description(settings: DeckSettings) -> str:
