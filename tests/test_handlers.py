@@ -444,6 +444,29 @@ async def test_back_from_the_theme_step_returns_to_the_audio_step(harness: BotHa
     assert "Что озвучить?" in harness.session.last_edit_text()
 
 
+async def test_every_settings_screen_goes_out_as_html(harness: BotHarness) -> None:
+    """Забыть parse_mode на одном экране — показать человеку теги буквально.
+
+    Ровно так и случилось с экраном Оформления: текст разметили, а параметр при
+    отправке не проставили.
+    """
+    harness.loader.tables["deck.xlsx"] = make_table(("a", "б"), title="deck")
+    await harness.send_document("deck.xlsx", user_id=ADMIN_ID)
+    chosen = DeckSettings(note_type_id="basic", lang_q="de", lang_a="ru", audio=AudioSide.NONE)
+
+    screens = {
+        "языки": callbacks.note_type("basic"),
+        "пары": callbacks.configure("basic"),
+        "озвучка": callbacks.language_pair("basic", "de", "ru"),
+        "оформление": callbacks.settings(chosen),
+    }
+    for name, press in screens.items():
+        await harness.press(press, user_id=ADMIN_ID)
+        edit = harness.session.last_edit()
+        assert edit.parse_mode == "HTML", f"экран «{name}» ушёл без разметки"
+        assert "<b>" in (edit.text or ""), name
+
+
 async def test_a_type_with_its_own_css_skips_the_theme_step(harness: BotHarness) -> None:
     """Вьетнамский тип не темизируется — выбор озвучки сразу ставит Задание в очередь."""
     harness.loader.tables["deck.xlsx"] = make_table(("a", "б"), title="deck")
