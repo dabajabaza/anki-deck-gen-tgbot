@@ -31,6 +31,8 @@ KNOWN_PLACEHOLDERS = {
     "columns",
     "pair",
     "description",
+    "name",
+    "options",
     "lang",
     "position",
     "limit",
@@ -93,6 +95,32 @@ def test_placeholders_are_known() -> None:
         for _, field, _, _ in formatter.parse(value):
             if field:
                 assert field in KNOWN_PLACEHOLDERS, f"{name}: {{{field}}}"
+
+
+def _button_width(label: str) -> float:
+    """Грубая мера ширины подписи: кириллица заметно шире латиницы.
+
+    Telegram режет подпись кнопки по ширине экрана и без многоточия. Точной
+    границы у нас нет, порог откалиброван по двум замерам на телефоне 6":
+    «English → Русский, озвучен English» помещается, «Простая (с обратной
+    карточкой)» — уже нет.
+    """
+    cyrillic = sum(1 for char in label if "а" <= char.lower() <= "я" or char.lower() == "ё")
+    return len(label) + 0.6 * cyrillic
+
+
+def test_button_labels_fit_a_phone_screen() -> None:
+    labels = {
+        name: value
+        for name, value in _constants().items()
+        if name.startswith("BTN_") and "{" not in value
+    }
+    assert labels, "подписи кнопок разъехались по другим именам"
+    for name, value in labels.items():
+        assert _button_width(value) <= 44, f"{name}: {value}"
+    # Единственная подпись с подстановкой: коды языков, самый длинный — три буквы.
+    longest = DeckSettings(note_type_id="basic", lang_q="vie", lang_a="rus", audio=AudioSide.BOTH)
+    assert _button_width(texts.last_button(longest)) <= 44, texts.last_button(longest)
 
 
 def test_plural_forms() -> None:

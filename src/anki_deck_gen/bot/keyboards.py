@@ -56,7 +56,7 @@ def languages(note_type_id: str, last: DeckSettings | None) -> InlineKeyboardMar
     last_row = (
         [
             InlineKeyboardButton(
-                text=texts.BTN_LANG_LAST.format(description=texts.settings_description(last)),
+                text=texts.last_button(last),
                 callback_data=callbacks.last_used(note_type_id),
             )
         ]
@@ -124,7 +124,7 @@ def themes(note_type_id: str, lang_q: str, lang_a: str, audio: AudioSide) -> Inl
             note_type_id=note_type_id, lang_q=lang_q, lang_a=lang_a, audio=audio, theme=theme
         )
         return InlineKeyboardButton(
-            text=texts.theme_button(theme), callback_data=callbacks.build(value)
+            text=texts.theme_name(theme), callback_data=callbacks.build(value)
         )
 
     return _rows(
