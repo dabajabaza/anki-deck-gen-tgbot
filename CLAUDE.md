@@ -54,10 +54,12 @@ prefs), `bot/` (aiogram: handlers, texts, keyboards, pending, storage, middlewar
   types. Changing CSS needs no new `model_id` (Anki updates a same-schema type on import
   when mtime is newer); `themed = False` on a type skips the theme step in the bot.
   Callback data must stay ≤ 64 bytes — the longest is `t:<type>:<lq>-<la>:<audio>:<theme>`.
-- **`NoteType.button` is the keyboard label, `NoteType.label` the prose one.** Telegram
-  truncates a button by screen width with no ellipsis and ignores newlines in it, so every
-  explanation lives in the message text, never on the button (`choose_languages`,
-  `choose_theme`). `tests/test_texts.py::test_button_labels_fit_a_phone_screen` guards it.
+- **`NoteType.button` is the keyboard label, `NoteType.label` the prose one.** A button
+  label is a plain `String` in the Bot API — no `parse_mode`, no entities, and clients
+  collapse newlines — so it cannot be wrapped or shortened with markup; Telegram just
+  truncates it by screen width, without an ellipsis. Every explanation therefore lives in
+  the message text above the keyboard (`choose_languages`, `choose_theme`), never on the
+  button. `tests/test_texts.py::test_button_labels_fit_a_phone_screen` guards the width.
 - **Card templates and CSS are files, not string literals** (`notetypes/assets/`), read
   verbatim through `importlib.resources`. No templating engine touches them: `{{Front}}`
   is Anki's own syntax and Jinja2 would eat it. A template file must end with exactly one
