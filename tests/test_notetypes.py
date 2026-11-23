@@ -10,12 +10,13 @@ from tests.helpers.tables import make_row
 OLD_MODEL_IDS = {2163323615, 2163323616, 2163323618, 1759261800, 1762620000}
 
 
-def test_registry_holds_the_stock_types_then_ours_then_the_vietnamese_one() -> None:
+def test_registry_holds_the_stock_types_then_ours_then_the_custom_ones() -> None:
     assert list(notetypes.REGISTRY) == [
         "basic",
         "basic-reversed",
         "basic-typing",
         "basic-typing-reversed",
+        "chinese",
         "vietnamese",
     ]
 
@@ -131,7 +132,9 @@ def test_anki_name_carries_the_suffix_so_it_cannot_shadow_the_stock_type() -> No
 
 def test_compatible_filters_by_required_columns_and_visibility() -> None:
     with_qa = notetypes.compatible(frozenset({"Q", "A"}))
-    assert [nt.id for nt in with_qa] == list(notetypes.REGISTRY)
+    assert [nt.id for nt in with_qa] == [nt for nt in notetypes.REGISTRY if nt != "chinese"]
+    with_pinyin = notetypes.compatible(frozenset({"Q", "A", "Pinyin"}))
+    assert [nt.id for nt in with_pinyin] == list(notetypes.REGISTRY)
     assert notetypes.compatible(frozenset({"Q"})) == []
 
 

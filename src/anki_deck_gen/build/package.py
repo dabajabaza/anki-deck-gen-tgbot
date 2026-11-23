@@ -134,7 +134,9 @@ def build_package(
         deck_name=request.deck_name,
         subdecks=tuple(grouped),
         notes=len(rows),
-        cards=len(rows) * note_type.cards_per_note,
+        # Не rows × cards_per_note: Карточку с пустым лицом Anki не заводит (у китайского
+        # типа без озвучки нет «На слух»), и итог должен совпасть с тем, что увидит человек.
+        cards=sum(len(note.cards) for notes in grouped.values() for note in notes),
         media_files=len(media),
         skipped=len(request.skips),
         duplicates=len(validation.duplicates),
