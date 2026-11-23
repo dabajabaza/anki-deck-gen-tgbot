@@ -28,5 +28,6 @@ from anki_deck_gen.notetypes import (  # noqa: E402
     basic_reversed,  # noqa: F401
     basic_typing,  # noqa: F401
     basic_typing_reversed,  # noqa: F401
+    chinese,  # noqa: F401
     vietnamese,  # noqa: F401
 )

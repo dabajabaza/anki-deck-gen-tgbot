@@ -119,7 +119,7 @@ async def test_a_clean_table_shows_summary_and_note_types(harness: BotHarness) -
     labels = harness.session.last_edit_labels()
     assert texts.BTN_RENAME in labels
     # На кнопках короткие подписи, полное имя типа — на следующем шаге.
-    assert [nt.button for nt in notetypes.REGISTRY.values() if nt.visible_in_bot] == labels[:-1]
+    assert [nt.button for nt in notetypes.compatible(frozenset({"Q", "A"}))] == labels[:-1]
     assert harness.pending.get(ADMIN_ID) is not None
 
 
